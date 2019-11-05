@@ -1,2 +1,4 @@
 # CSC_309_Project
- Ebbok app
+ Ebook app
+
+Made in Android Studio using API 22 on Pixel.
