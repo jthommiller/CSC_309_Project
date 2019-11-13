@@ -24,6 +24,7 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
+    // Array of the books
     // BookName, Author, DownloadLink
     final String[][] Books = {
             {"Adventures of Huckleberry Finn", "Mark Twain", "https://www.gutenberg.org/files/76/76-0.txt"},
@@ -160,18 +161,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        if (android.os.Build.VERSION.SDK_INT > 9)
-        {
-            StrictMode.ThreadPolicy policy = new
-                    StrictMode.ThreadPolicy.Builder().permitAll().build();
+        // Needed to make http work properly
+        if (android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
 
+        // Test button to make sure book downloaded
         final Button start = findViewById( R.id.button);
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String URL = "";
+                String URL = "https://www.gutenberg.org/files/41/41-0.txt";
                 String file = fetchItem(URL);
                 System.out.println(file);
                 TextView text = findViewById(R.id.testvew);
