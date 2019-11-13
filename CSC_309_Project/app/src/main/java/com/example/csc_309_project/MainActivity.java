@@ -13,14 +13,19 @@ import android.os.StrictMode;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.SQLOutput;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -155,31 +160,112 @@ public class MainActivity extends AppCompatActivity {
         return "";
     }
 
+    // Sets the value of the prices
+    public String loadBook(String BookName){
+        String Book = "";
+
+        FileInputStream fis = null;
+
+        try {
+            fis = openFileInput(BookName);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader br = new BufferedReader(isr);
+            String text;
+
+            // Puts the saved file all into a readable form
+            while((text = br.readLine()) != null){
+                Book += text + "\n";
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fis != null){
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return Book;
+    }
+
+    // Saves the book into the phone for offline use
+    public void saveBook(String Book, String BookName){
+        // Sets up file output stream to be able to save the book
+        FileOutputStream fos = null;
+        try {
+            fos = openFileOutput(BookName, MODE_PRIVATE);
+            fos.write(Book.getBytes());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null){
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        // Needed to make http work properly
+        // Needed to make http download work properly
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
 
+                                    // Test Variable
+                                    final int BookID = 15;
+                                    final int BookName = 0;
+                                    final int AuthorID = 1;
+                                    final int DownloadURL = 2;
+
         // Test button to make sure book downloaded
-        final Button start = findViewById( R.id.button);
-        start.setOnClickListener(new View.OnClickListener() {
+        final Button download = findViewById( R.id.Download);
+        download.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String URL = "https://www.gutenberg.org/files/41/41-0.txt";
-                String file = fetchItem(URL);
-                System.out.println(file);
-                TextView text = findViewById(R.id.testvew);
-                text.setText(file);
+
+                String URL = Books[BookID][DownloadURL];
+                String Book = fetchItem(URL);
+                saveBook(Book, Books[BookID][BookName] );
+
+                                    // Test code only
+                                    TextView text = findViewById(R.id.testvew);
+                                    text.setText(Book);
             }
         });
 
+
+        // Test button to make sure book downloaded
+        final Button load = findViewById( R.id.load);
+        load.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                String Book = "";
+                Book = loadBook(Books[BookID][BookName]);
+
+                                    // Test code only
+                                    TextView text = findViewById(R.id.testvew);
+                                    text.setText(Book);
+            }
+        });
 
     }
 }
