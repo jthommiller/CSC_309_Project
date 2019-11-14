@@ -18,6 +18,7 @@ import android.widget.Toast;
 import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -127,12 +128,12 @@ public class MainActivity extends AppCompatActivity {
             {"The Works of Edgar Allan Poe, The Raven Edition", "Edgar Allan Poe", "https://www.gutenberg.org/ebooks/25525.txt.utf-8", "false"},
             {"Wuthering Heights", "Emily Brontë", "https://www.gutenberg.org/ebooks/768.txt.utf-8", "false"},
             {"The Yellow Wallpaper", "Charlotte Perkins Gilman", "https://www.gutenberg.org/files/1952/1952-0.txt", "false"}
-            };
+    };
 
 
 
     // function to get one item (current data or forecast) from the server
-    protected String fetchItem( String str_url ) {
+    protected String downloadBook( String str_url ) {
         try {
             // assemble the string and the search request
             StringBuilder response = new StringBuilder();
@@ -160,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
         return "";
     }
 
-    // Sets the value of the prices
+    // Loades the book from storage
     public String loadBook(String BookName){
         String Book = "";
 
@@ -216,7 +217,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    // Deletes the book off the phone
+    public boolean deleteBook( String BookName ){
+        boolean deleted = false;
+        try{
+            File dir = getFilesDir();
+            File file = new File(dir, BookName);
+            deleted = file.delete();
+        } catch ( Exception E ){
+            E.printStackTrace();
+        } finally {
+            return deleted;
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -230,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
                                     // Test Variable
-                                    final int BookID = 15;
+                                    final int BookID = 2;
                                     final int BookName = 0;
                                     final int AuthorID = 1;
                                     final int DownloadURL = 2;
@@ -244,9 +257,11 @@ public class MainActivity extends AppCompatActivity {
 
                 // If the book is already downloaded don't download again
                 if ( Books[BookID][downloaded] == "false"){
-                    String URL = Books[BookID][DownloadURL];
-                    String Book = fetchItem(URL);
-                    saveBook(Book, Books[BookID][BookName] );
+                    String Book = downloadBook(Books[BookID][DownloadURL]);
+                    if (Book != "" ){
+                        saveBook(Book, Books[BookID][BookName] );
+                        Books[BookID][downloaded] = "true";
+                    }
 
                                     // Test code only
                                     TextView text = findViewById(R.id.testvew);
@@ -262,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                // if book is downloaded load book
+                // If book is downloaded load book
                 if ( Books[BookID][downloaded] == "true"){
                     String Book = "";
                     Book = loadBook(Books[BookID][BookName]);
@@ -270,6 +285,26 @@ public class MainActivity extends AppCompatActivity {
                                     // Test code only
                                     TextView text = findViewById(R.id.testvew);
                                     text.setText(Book);
+                }
+            }
+        });
+
+        // Test button to make sure book downloaded
+        final Button delete = findViewById( R.id.delete);
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                // If book is downloaded delete book
+                if ( Books[BookID][downloaded] == "true"){
+                    boolean Bookdeleted = deleteBook(Books[BookID][BookName]);
+                    if (Bookdeleted){
+                        Books[BookID][downloaded] = "false";
+                    }
+
+                                    // Test code only
+                                    TextView text = findViewById(R.id.testvew);
+                                    text.setText("Deleted: " + Bookdeleted);
                 }
             }
         });
