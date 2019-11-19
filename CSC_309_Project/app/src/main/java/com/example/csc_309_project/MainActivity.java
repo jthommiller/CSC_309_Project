@@ -12,6 +12,9 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -131,6 +134,17 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
+    String downloadLink = "";
+    // Runs the book downloading method
+    Thread downloadBookThread = new Thread(){
+        public void run() {
+            try{
+               downloadBook(downloadLink);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    };
 
     // function to get one item (current data or forecast) from the server
     protected String downloadBook( String str_url ) {
@@ -230,6 +244,7 @@ public class MainActivity extends AppCompatActivity {
             return deleted;
         }
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -241,6 +256,56 @@ public class MainActivity extends AppCompatActivity {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
+
+        TableLayout BookTable;
+        TableRow tr = null;
+
+        BookTable = (TableLayout) findViewById(R.id.BookTable);
+
+
+        tr = new TableRow(this);
+        BookTable.addView(tr);
+        for (int i = 0; i < Books.length; i++){
+            for(int j = 0; j < 3; j++){
+                if ( j == 2 ) {
+                    final Button downloadButton = new Button(this);
+                    downloadButton.setText("Download Book");
+                    downloadButton.setId(i);
+                    downloadButton.setOnClickListener(new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            if ( Books[v.getId()][3] == "false" ){
+
+                                downloadBookThread.run();
+                                Books[v.getId()][3] = "true";
+                            }
+
+                        }
+                    });
+                    tr.addView(downloadButton);
+                } else if ( j == 1  ) {
+
+                    Button Author = new Button(this);
+                    Author.setText(Books[i][1]);
+                    Author.setId(i);
+                    Author.setTextSize(1);
+                    tr.addView(Author);
+
+                } else {
+                    Button BookName = new Button(this);
+                    BookName.setText(Books[i][0]);
+                    BookName.setId(i);
+                    BookName.setTextSize(1);
+                    tr.addView(BookName);
+                }
+            }
+            tr = new TableRow(this);
+            BookTable.addView(tr);
+        }
+
+
+
 
                                     // Test Variable
                                     final int BookID = 2;
