@@ -31,6 +31,7 @@
         app:layout_constraintTop_toBottomOf="@+id/mainMenuTitle">
 
         <TableLayout
+            android:id="@+id/tableOfBooks"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 

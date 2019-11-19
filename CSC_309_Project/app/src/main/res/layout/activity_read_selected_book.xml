@@ -24,29 +24,10 @@
             android:id="@+id/seekRandomPlaceBar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="75dp"
+            android:layout_marginTop="15dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:id="@+id/divider"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="25dp"
-            android:background="?android:attr/listDivider"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/seekRandomPlaceBar" />
-
-        <Spinner
-            android:id="@+id/changeTextFontSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider" />
+            app:layout_constraintTop_toBottomOf="@+id/returnToUserBookMenu" />
 
         <ScrollView
             android:id="@+id/scrollView2"
@@ -56,7 +37,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/changeTextFontSpinner">
+            app:layout_constraintTop_toBottomOf="@+id/seekRandomPlaceBar">
 
             <TextView
                 android:id="@+id/bookTextView"
@@ -65,6 +46,29 @@
                 android:paddingLeft="20sp"
                 android:paddingRight="20sp" />
         </ScrollView>
+
+        <EditText
+            android:id="@+id/declaredFontSize"
+            android:layout_width="57dp"
+            android:layout_height="50dp"
+            android:ems="10"
+            android:gravity="center"
+            android:inputType="number"
+            android:maxLength="2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginRight="20dp"
+            android:text="Font Size:"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toStartOf="@+id/declaredFontSize"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
