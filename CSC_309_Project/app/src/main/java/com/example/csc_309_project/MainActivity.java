@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Array of the books
     // BookName, Author, DownloadLink, DownloadedOrNot(true or false)
-    final String[][] Books = {
+    String[][] Books = {
             {"Adventures of Huckleberry Finn", "Mark Twain", "https://www.gutenberg.org/files/76/76-0.txt", "false"},
             {"The Adventures of Sherlock Holmes", "Arthur Conan Doyle", "https://www.gutenberg.org/files/1661/1661-0.txt", "false"},
             {"The Adventures of Tom Sawyer", "Mark Twain", "https://www.gutenberg.org/files/74/74-0.txt", "false"},
@@ -134,12 +134,13 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    String downloadLink = "";
+    int downloadID = 0;
     // Runs the book downloading method
     Thread downloadBookThread = new Thread(){
         public void run() {
             try{
-               downloadBook(downloadLink);
+               saveBook(downloadBook(Books[downloadID][2]), Books[downloadID][0]);
+               Books[downloadID][3] = "true";
             } catch (Exception e){
                 e.printStackTrace();
             }
@@ -170,9 +171,10 @@ public class MainActivity extends AppCompatActivity {
                 return response.toString();
             }
         } catch ( IOException e ) {
-            return e.getMessage();
+            System.out.println(e);
+            return "false";
         }
-        return "";
+        return "false";
     }
 
     // Loades the book from storage
@@ -245,23 +247,27 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    // Checks if the book is currently downloaded
+    public void checkBookDownloaded(){
+        for (int i = 0; i < Books.length; i++){
+            FileInputStream fis = null;
 
-        // Needed to make http download work properly
-        if (android.os.Build.VERSION.SDK_INT > 9) {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
+            try {
+                fis = openFileInput(Books[i][0]);
+                Books[i][3] = "true";
+            } catch (FileNotFoundException e) {
+                Books[i][3] = "false";
+                e.printStackTrace();
+            }
         }
+    }
 
-        TableLayout BookTable;
+    // Creates the table for downloading books
+    public void createTable(){
+        final TableLayout BookTable;
         TableRow tr = null;
-
         BookTable = (TableLayout) findViewById(R.id.BookTable);
-
+        BookTable.removeAllViews();
 
         tr = new TableRow(this);
         BookTable.addView(tr);
@@ -269,20 +275,26 @@ public class MainActivity extends AppCompatActivity {
             for(int j = 0; j < 3; j++){
                 if ( j == 2 ) {
                     final Button downloadButton = new Button(this);
-                    downloadButton.setText("Download Book");
-                    downloadButton.setId(i);
-                    downloadButton.setOnClickListener(new View.OnClickListener() {
+                    if ( Books[i][3] == "false" ) {
+                        downloadButton.setText("Download Book");
+                        downloadButton.setId(i);
+                        downloadButton.setOnClickListener(new View.OnClickListener() {
 
-                        @Override
-                        public void onClick(View v) {
-                            if ( Books[v.getId()][3] == "false" ){
+                            @Override
+                            public void onClick(View v) {
+                                if ( Books[v.getId()][3] == "false" ){
+                                    downloadID = v.getId();
+                                    Books[v.getId()][3] = "true";
+                                    downloadBookThread.run();
+                                    createTable();
+                                }
 
-                                downloadBookThread.run();
-                                Books[v.getId()][3] = "true";
                             }
-
-                        }
-                    });
+                        });
+                    } else {
+                        downloadButton.setText("Book Downloaded");
+                        downloadButton.setId(i);
+                    }
                     tr.addView(downloadButton);
                 } else if ( j == 1  ) {
 
@@ -303,10 +315,21 @@ public class MainActivity extends AppCompatActivity {
             tr = new TableRow(this);
             BookTable.addView(tr);
         }
+    }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-
-
+        // Needed to make http download work properly
+        if (android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
+        checkBookDownloaded();
+        createTable();
                                     // Test Variable
                                     final int BookID = 2;
                                     final int BookName = 0;
