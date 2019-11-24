@@ -135,6 +135,7 @@ public class userBookMenu extends AppCompatActivity {
             {"The Yellow Wallpaper", "Charlotte Perkins Gilman", "https://www.gutenberg.org/files/1952/1952-0.txt", "false"}
     };
 
+    // Global variable so buttons set which book should be downloading
     int downloadID = 0;
     // Runs the book downloading method
     Thread downloadBookThread = new Thread(){
@@ -233,20 +234,25 @@ public class userBookMenu extends AppCompatActivity {
 
     // Creates the table for downloading books
     public void createTableDownload(){
+
+        // Creates the table
         final TableLayout BookTable;
         TableRow tr = null;
         BookTable = (TableLayout) findViewById(R.id.tableOfBooks);
         BookTable.removeAllViews();
         int tableWidth = BookTable.getWidth();
 
+        // Creates new row
         tr = new TableRow(this);
         BookTable.addView(tr);
         for (int i = 0; i < Books.length; i++){
             for(int j = 0; j < 3; j++){
+
+                // When column is third one it creates the download button
                if ( j == 2 ) {
                     final Button downloadButton = new Button(this);
                     if ( Books[i][3] == "false" ) {
-                        downloadButton.setText("Download Book");
+                        downloadButton.setText("Download");
                         downloadButton.setId(i);
                         downloadButton.setWidth((int) (tableWidth*0.25));
                         downloadButton.setOnClickListener(new View.OnClickListener() {
@@ -258,19 +264,18 @@ public class userBookMenu extends AppCompatActivity {
                                     Books[v.getId()][3] = "true";
                                     downloadBookThread.run();
                                     createTableDownload();
-
-
-                                    ScrollView mainmenu = findViewById(R.id.MainMenuScrollView);
-                                    System.out.println(mainmenu.getScrollX() + "   " + mainmenu.getScrollY());
                                 }
 
                             }
                         });
                     } else {
-                        downloadButton.setText("Book Downloaded");
+                        downloadButton.setText("Downloaded");
                         downloadButton.setId(i);
+                        downloadButton.setTextSize(12);
                     }
                     tr.addView(downloadButton);
+
+                    // When column is third it creates the Author text view
                 } else if ( j == 1  ) {
 
                     TextView Author = new TextView(this);
@@ -279,6 +284,7 @@ public class userBookMenu extends AppCompatActivity {
                     Author.setWidth((int) (tableWidth*0.25));
                     tr.addView(Author);
 
+                    // When column is anything else text view defaults to bookname
                 } else {
                    TextView BookName = new TextView(this);
                     BookName.setText(Books[i][0]);
@@ -294,6 +300,8 @@ public class userBookMenu extends AppCompatActivity {
 
     // Creates the table for showing owned books
     public void createTableOwned(){
+
+        // Creates the table
         final TableLayout BookTable;
         TableRow tr = null;
         BookTable = (TableLayout) findViewById(R.id.tableOfBooks);
@@ -301,12 +309,17 @@ public class userBookMenu extends AppCompatActivity {
         int tableWidth = BookTable.getWidth();
 
 
-        // Need to add highlight to last book read
+        // Need to add highlight to last book read //
+
+        // Creates new row
         tr = new TableRow(this);
         BookTable.addView(tr);
         for (int i = 0; i < Books.length; i++){
             for(int j = 0; j < 3; j++) {
                 if (Books[i][3] == "true") {
+
+
+                    // When column is third one it creates the delete book button
                     if ( j == 2 ){
                         final Button deleteButton = new Button(this);
                         deleteButton.setText("Delete");
@@ -324,6 +337,8 @@ public class userBookMenu extends AppCompatActivity {
                             }
                         });
                         tr.addView(deleteButton);
+
+                        // When column is third it creates the Author text view
                     } else if (j == 1) {
 
                         TextView Author = new TextView(this);
@@ -332,6 +347,7 @@ public class userBookMenu extends AppCompatActivity {
                         Author.setWidth((int) (tableWidth*0.25));
                         tr.addView(Author);
 
+                        // When column is anything else text view defaults to bookname
                     } else {
                         TextView BookName = new TextView(this);
                         BookName.setText(Books[i][0]);
@@ -342,9 +358,11 @@ public class userBookMenu extends AppCompatActivity {
 
                         BookName.setOnClickListener(new View.OnClickListener() {
 
+                            // Allows the text view be clicked and have a use
                             @Override
                             public void onClick(View v) {
-                                // Pass book name into other activity
+                                // We need to pass in Bookname, which is Books[v.getId()][0]
+                                // Books are saved and loaded using booknames so in the other activity we use this to load the book
                             }
                         });
                     }
