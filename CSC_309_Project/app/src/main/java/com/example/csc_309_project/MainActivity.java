@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
             {"Wuthering Heights", "Emily Brontë", "https://www.gutenberg.org/ebooks/768.txt.utf-8", "false"},
             {"The Yellow Wallpaper", "Charlotte Perkins Gilman", "https://www.gutenberg.org/files/1952/1952-0.txt", "false"}
     };
-
+    String[][] Position;
 
     int downloadID = 0;
     // Runs the book downloading method
@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
         return "false";
     }
 
-    // Loades the book from storage
+    // Loads the book from storage
     public String loadBook(String BookName){
         String Book = "";
 
@@ -193,7 +193,6 @@ public class MainActivity extends AppCompatActivity {
             while((text = br.readLine()) != null){
                 Book += text + "\n";
             }
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -207,6 +206,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
+        // Add getting position from array here
+        // Scroll view set position here
+
+
 
         return Book;
     }
@@ -231,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        savePosition(BookName, 0);
     }
 
     // Deletes the book off the phone
@@ -240,9 +245,11 @@ public class MainActivity extends AppCompatActivity {
             File dir = getFilesDir();
             File file = new File(dir, BookName);
             deleted = file.delete();
+            deletePosition(BookName);
         } catch ( Exception E ){
             E.printStackTrace();
         } finally {
+            deletePosition(BookName);
             return deleted;
         }
     }
@@ -317,6 +324,173 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Deletes the position out of memory
+    public void deletePosition(String BookName){
+
+    }
+
+    // Saves position in the book
+    public void savePosition(String BookName, int BookPosition){
+        deletePosition(BookName);
+
+        // Sets up file output stream to be able to save the book
+        final String FileName = "Position";
+        FileOutputStream fos = null;
+        String BookInfo = BookName + "\n" + BookPosition;
+        try {
+            fos = openFileOutput(FileName, MODE_PRIVATE);
+            fos.write(BookInfo.getBytes());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null){
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+    }
+
+
+    // Checks how many books are currently downloaded
+    public int howManyOwned(){
+        checkBookDownloaded();
+        int amount = 0;
+        for (int i = 0; i < Books.length; i++) {
+            if (Books[i][3].equals("true")) {
+                amount++;
+            }
+        }
+        return amount;
+    }
+
+    // Loads position in the book
+    public void loadPositionArray(String BookName){
+        Position = new String[howManyOwned()][2];
+        FileInputStream fis = null;
+
+        try {
+            fis = openFileInput(BookName);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader br = new BufferedReader(isr);
+            String text;
+
+            int counter = 0;
+            // Puts the saved file all into a readable form
+            while((text = br.readLine()) != null){
+                if ( counter % 2 == 0 ){
+                    Position[counter][0] = text;
+                } else {
+                    Position[counter][1] = text;
+                }
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fis != null){
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    // Gets where is the position array is this book
+    public int getBookPositionID( String BookName){
+        int position = 0;
+
+        for (int i = 0; i < Books.length; i++ ){
+            if( Books[i][0] == BookName ){
+                position = i;
+                break;
+            }
+        }
+
+        return position;
+    }
+
+    // Creates the table for showing owned books
+    public void createTableOwned(){
+
+
+        // Creates the table
+        final TableLayout BookTable;
+        TableRow tr = null;
+        BookTable = (TableLayout) findViewById(R.id.tableOfBooks);
+        BookTable.removeAllViews();
+        int tableWidth = BookTable.getWidth();
+
+        // Creates new row
+        tr = new TableRow(this);
+        BookTable.addView(tr);
+        for (int i = 0; i < Position.length; i++){
+
+            int bookPosition = getBookPositionID(Position[i][0]);
+
+            for(int j = 0; j < 3; j++) {
+
+                // Creates Delete button for each record of the table in the third column
+                if ( j == 2 ){
+                    final Button deleteButton = new Button(this);
+                    deleteButton.setText("Delete");
+                    deleteButton.setId(bookPosition);
+                    deleteButton.setWidth((int) (tableWidth*0.25));
+                    deleteButton.setOnClickListener(new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            boolean isDeleted = deleteBook(Books[v.getId()][0]);
+                            if (isDeleted){
+                                Books[v.getId()][3] = "false";
+                            }
+                            createTableOwned();
+                        }
+                    });
+                    tr.addView(deleteButton);
+
+                    // Creates Author textview for second column
+                } else if (j == 1) {
+
+                    TextView Author = new TextView(this);
+                    Author.setText(Books[bookPosition][1]);
+                    Author.setId(bookPosition);
+                    Author.setWidth((int) (tableWidth*0.25));
+                    tr.addView(Author);
+
+                    // Creates book title textview for the first column
+                } else {
+                    TextView BookName = new TextView(this);
+                    BookName.setText(Books[bookPosition][0]);
+                    BookName.setId(bookPosition);
+                    BookName.setWidth((int) (tableWidth*0.5));
+                    BookName.setClickable(true);
+                    tr.addView(BookName);
+
+                    BookName.setOnClickListener(new View.OnClickListener() {
+
+                        // Allows the text view be clicked and have a use
+                        @Override
+                        public void onClick(View v) {
+                            // We need to pass in Bookname, which is Books[v.getId()][0]
+                            // Books are saved and loaded using booknames so in the other activity we use this to load the book
+                        }
+                    });
+                }
+            }
+            tr = new TableRow(this);
+            BookTable.addView(tr);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -329,7 +503,8 @@ public class MainActivity extends AppCompatActivity {
             StrictMode.setThreadPolicy(policy);
         }
         checkBookDownloaded();
-        createTable();
+
+
                                     // Test Variable
                                     final int BookID = 2;
                                     final int BookName = 0;
