@@ -326,7 +326,19 @@ public class MainActivity extends AppCompatActivity {
 
     // Deletes the position out of memory
     public void deletePosition(String BookName){
-
+        loadPositionArray();
+        for (int i = 0; i <= Position.length; i++ ){
+            if ( Position[i][0].equals(BookName) ){
+                Position[i][0] = "";
+                Position[i][1] = "";
+            } else if ( i <Position.length ) {
+                Position[i-1][0] = Position[i][0];
+                Position[i-1][0] = Position[i][0];
+            } else {
+                Position[i-1][0] = "";
+                Position[i-1][0] = "";
+            }
+        }
     }
 
     // Saves position in the book
@@ -336,10 +348,13 @@ public class MainActivity extends AppCompatActivity {
         // Sets up file output stream to be able to save the book
         final String FileName = "Position";
         FileOutputStream fos = null;
-        String BookInfo = BookName + "\n" + BookPosition;
+        String positionList = BookName + "\n" + BookPosition;
+        for (int i = 0; i < Position.length; i++ ){
+            positionList += Position[i][0] + "\n" + Position[i][1];
+        }
         try {
             fos = openFileOutput(FileName, MODE_PRIVATE);
-            fos.write(BookInfo.getBytes());
+            fos.write(positionList.getBytes());
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -369,12 +384,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Loads position in the book
-    public void loadPositionArray(String BookName){
+    public void loadPositionArray(){
         Position = new String[howManyOwned()][2];
         FileInputStream fis = null;
+        final String FileName = "Position";
 
         try {
-            fis = openFileInput(BookName);
+            fis = openFileInput(FileName);
             InputStreamReader isr = new InputStreamReader(fis);
             BufferedReader br = new BufferedReader(isr);
             String text;
