@@ -248,7 +248,7 @@ public class userBookMenu extends AppCompatActivity {
         for (int i = 0; i < Books.length; i++){
             for(int j = 0; j < 3; j++){
 
-                // When column is third one it creates the download button
+                // Creates download button for each record of the table in the third column
                if ( j == 2 ) {
                     final Button downloadButton = new Button(this);
                     if ( Books[i][3] == "false" ) {
@@ -275,7 +275,7 @@ public class userBookMenu extends AppCompatActivity {
                     }
                     tr.addView(downloadButton);
 
-                    // When column is third it creates the Author text view
+                    // Creates Author Textview for second column
                 } else if ( j == 1  ) {
 
                     TextView Author = new TextView(this);
@@ -284,7 +284,7 @@ public class userBookMenu extends AppCompatActivity {
                     Author.setWidth((int) (tableWidth*0.25));
                     tr.addView(Author);
 
-                    // When column is anything else text view defaults to bookname
+                    //Creates bookname with the first column
                 } else {
                    TextView BookName = new TextView(this);
                     BookName.setText(Books[i][0]);
@@ -319,7 +319,7 @@ public class userBookMenu extends AppCompatActivity {
                 if (Books[i][3] == "true") {
 
 
-                    // When column is third one it creates the delete book button
+                    // Creates Delete button for each record of the table in the third column
                     if ( j == 2 ){
                         final Button deleteButton = new Button(this);
                         deleteButton.setText("Delete");
@@ -338,7 +338,7 @@ public class userBookMenu extends AppCompatActivity {
                         });
                         tr.addView(deleteButton);
 
-                        // When column is third it creates the Author text view
+                        // Creates Author textview for second column
                     } else if (j == 1) {
 
                         TextView Author = new TextView(this);
@@ -347,7 +347,7 @@ public class userBookMenu extends AppCompatActivity {
                         Author.setWidth((int) (tableWidth*0.25));
                         tr.addView(Author);
 
-                        // When column is anything else text view defaults to bookname
+                        // Creates book title textview for the first column
                     } else {
                         TextView BookName = new TextView(this);
                         BookName.setText(Books[i][0]);
@@ -373,9 +373,7 @@ public class userBookMenu extends AppCompatActivity {
         }
     }
 
-
-    //"F7F9F9, AFA2FF, 3C3744, C8C6AF, 808D8E"
-
+    // Strings use to denote which table the user is looking at
     final static String usersLibraryTitle = "Your Library";
     final static String addToLibraryTitle = "Download Books To Your Library";
 
@@ -408,8 +406,6 @@ public class userBookMenu extends AppCompatActivity {
                     tv.setText(addToLibraryTitle);
                     createTableDownload();
                 }
-                //tl.setSelectedTabIndicatorColor(Color.rgb(60, 55, 68));
-                tl.setBackgroundColor(Color.rgb(60, 55, 68));
             }
 
             @Override
