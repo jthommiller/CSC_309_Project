@@ -134,7 +134,7 @@ public class userBookMenu extends AppCompatActivity {
             {"Wuthering Heights", "Emily Brontë", "https://www.gutenberg.org/ebooks/768.txt.utf-8", "false"},
             {"The Yellow Wallpaper", "Charlotte Perkins Gilman", "https://www.gutenberg.org/files/1952/1952-0.txt", "false"}
     };
-
+    String[][] Position;
     // Global variable so buttons set which book should be downloading
     int downloadID = 0;
     // Runs the book downloading method
@@ -144,6 +144,7 @@ public class userBookMenu extends AppCompatActivity {
                 String book = downloadBook(Books[downloadID][2]);
                 saveBook(book, Books[downloadID][0]);
                 Books[downloadID][3] = "true";
+
             } catch (Exception e){
                 System.out.println(e);
                 e.printStackTrace();
@@ -210,9 +211,11 @@ public class userBookMenu extends AppCompatActivity {
             File dir = getFilesDir();
             File file = new File(dir, BookName);
             deleted = file.delete();
+            deletePosition(BookName, Position);
         } catch ( Exception E ){
             E.printStackTrace();
         } finally {
+            deletePosition(BookName, Position);
             return deleted;
         }
     }
@@ -301,6 +304,7 @@ public class userBookMenu extends AppCompatActivity {
     // Creates the table for showing owned books
     public void createTableOwned(){
 
+
         // Creates the table
         final TableLayout BookTable;
         TableRow tr = null;
@@ -308,69 +312,148 @@ public class userBookMenu extends AppCompatActivity {
         BookTable.removeAllViews();
         int tableWidth = BookTable.getWidth();
 
-
-        // Need to add highlight to last book read //
-
         // Creates new row
         tr = new TableRow(this);
         BookTable.addView(tr);
-        for (int i = 0; i < Books.length; i++){
+        for (int i = 0; i < Position.length; i++){
+
+            int bookPosition = getBookPositionID(Position[i][0]);
+
             for(int j = 0; j < 3; j++) {
-                if (Books[i][3] == "true") {
 
+                // Creates Delete button for each record of the table in the third column
+                if ( j == 2 ){
+                    final Button deleteButton = new Button(this);
+                    deleteButton.setText("Delete");
+                    deleteButton.setId(bookPosition);
+                    deleteButton.setWidth((int) (tableWidth*0.25));
+                    deleteButton.setOnClickListener(new View.OnClickListener() {
 
-                    // Creates Delete button for each record of the table in the third column
-                    if ( j == 2 ){
-                        final Button deleteButton = new Button(this);
-                        deleteButton.setText("Delete");
-                        deleteButton.setId(i);
-                        deleteButton.setWidth((int) (tableWidth*0.25));
-                        deleteButton.setOnClickListener(new View.OnClickListener() {
-
-                            @Override
-                            public void onClick(View v) {
-                                boolean isDeleted = deleteBook(Books[v.getId()][0]);
-                                if (isDeleted){
-                                    Books[v.getId()][3] = "false";
-                                }
-                                createTableOwned();
+                        @Override
+                        public void onClick(View v) {
+                            boolean isDeleted = deleteBook(Books[v.getId()][0]);
+                            if (isDeleted){
+                                Books[v.getId()][3] = "false";
                             }
-                        });
-                        tr.addView(deleteButton);
+                            createTableOwned();
+                        }
+                    });
+                    tr.addView(deleteButton);
 
-                        // Creates Author textview for second column
-                    } else if (j == 1) {
+                    // Creates Author textview for second column
+                } else if (j == 1) {
 
-                        TextView Author = new TextView(this);
-                        Author.setText(Books[i][1]);
-                        Author.setId(i);
-                        Author.setWidth((int) (tableWidth*0.25));
-                        tr.addView(Author);
+                    TextView Author = new TextView(this);
+                    Author.setText(Books[bookPosition][1]);
+                    Author.setId(bookPosition);
+                    Author.setWidth((int) (tableWidth*0.25));
+                    tr.addView(Author);
 
-                        // Creates book title textview for the first column
-                    } else {
-                        TextView BookName = new TextView(this);
-                        BookName.setText(Books[i][0]);
-                        BookName.setId(i);
-                        BookName.setWidth((int) (tableWidth*0.5));
-                        BookName.setClickable(true);
-                        tr.addView(BookName);
+                    // Creates book title textview for the first column
+                } else {
+                    TextView BookName = new TextView(this);
+                    BookName.setText(Books[bookPosition][0]);
+                    BookName.setId(bookPosition);
+                    BookName.setWidth((int) (tableWidth*0.5));
+                    BookName.setClickable(true);
+                    tr.addView(BookName);
 
-                        BookName.setOnClickListener(new View.OnClickListener() {
+                    BookName.setOnClickListener(new View.OnClickListener() {
 
-                            // Allows the text view be clicked and have a use
-                            @Override
-                            public void onClick(View v) {
-                                // We need to pass in Bookname, which is Books[v.getId()][0]
-                                // Books are saved and loaded using booknames so in the other activity we use this to load the book
-                            }
-                        });
-                    }
+                        // Allows the text view be clicked and have a use
+                        @Override
+                        public void onClick(View v) {
+                            // We need to pass in Bookname, which is Books[v.getId()][0]
+                            // Books are saved and loaded using booknames so in the other activity we use this to load the book
+                        }
+                    });
                 }
             }
             tr = new TableRow(this);
             BookTable.addView(tr);
         }
+    }
+
+    // Loads position in the book
+    public String[][] loadPositionArray(String[][] position){
+        position = new String[howManyOwned()][2];
+        FileInputStream fis = null;
+        final String FileName = "Position";
+
+        try {
+            fis = openFileInput(FileName);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader br = new BufferedReader(isr);
+            String text;
+
+            int counter = 0;
+            // Puts the saved file all into a readable form
+            while((text = br.readLine()) != null){
+                if ( counter % 2 == 0 ){
+                    position[counter][0] = text;
+                } else {
+                    position[counter][1] = text;
+                }
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fis != null){
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return position;
+    }
+
+    // Checks how many books are currently downloaded
+    public int howManyOwned(){
+        checkBookDownloaded();
+        int amount = 0;
+        for (int i = 0; i < Books.length; i++) {
+            if (Books[i][3].equals("true")) {
+                amount++;
+            }
+        }
+        return amount;
+    }
+
+    // Gets where is the position array is this book
+    public int getBookPositionID( String BookName){
+        int position = 0;
+
+        for (int i = 0; i < Books.length; i++ ){
+            if( Books[i][0] == BookName ){
+                position = i;
+                break;
+            }
+        }
+
+        return position;
+    }
+
+    // Deletes the position out of memory
+    public String[][] deletePosition(String BookName, String[][] position){
+        loadPositionArray(position);
+        for (int i = 0; i <= position.length; i++ ){
+            if ( position[i][0].equals(BookName) ){
+                position[i][0] = "";
+                position[i][1] = "";
+            } else if ( i <position.length ) {
+                position[i-1][0] = position[i][0];
+                position[i-1][0] = position[i][0];
+            } else {
+                position[i-1][0] = "";
+                position[i-1][0] = "";
+            }
+        }
+        return position
     }
 
     // Strings use to denote which table the user is looking at
