@@ -6,23 +6,21 @@ Project: Create an android app that can download and read an Ebook
 package com.example.csc_309_project;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-
 import com.google.android.material.tabs.TabLayout;
-
 import org.w3c.dom.Text;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.prefs.Preferences;
 
 public class userBookMenu extends AppCompatActivity {
 
@@ -134,6 +133,7 @@ public class userBookMenu extends AppCompatActivity {
             {"Wuthering Heights", "Emily Brontë", "https://www.gutenberg.org/ebooks/768.txt.utf-8", "false"},
             {"The Yellow Wallpaper", "Charlotte Perkins Gilman", "https://www.gutenberg.org/files/1952/1952-0.txt", "false"}
     };
+
     String[][] Position;
     // Global variable so buttons set which book should be downloading
     int downloadID = 0;
@@ -151,7 +151,6 @@ public class userBookMenu extends AppCompatActivity {
             }
         }
     };
-
     // function to get one item (current data or forecast) from the server
     protected String downloadBook( String str_url ) {
         try {
@@ -239,27 +238,26 @@ public class userBookMenu extends AppCompatActivity {
     public void createTableDownload(){
 
         // Creates the table
-        final TableLayout BookTable;
+        TableRow.LayoutParams lp = new TableRow.LayoutParams();
+        TableRow.LayoutParams trlp = new TableRow.LayoutParams();
+        final TableLayout BookTable = findViewById(R.id.tableOfBooks);
         TableRow tr = null;
-        BookTable = (TableLayout) findViewById(R.id.tableOfBooks);
         BookTable.removeAllViews();
-        int tableWidth = BookTable.getWidth();
 
         // Creates new row
         tr = new TableRow(this);
-        BookTable.addView(tr);
+        trlp.height = 45;
         for (int i = 0; i < Books.length; i++){
             for(int j = 0; j < 3; j++){
-
                 // Creates download button for each record of the table in the third column
                if ( j == 2 ) {
                     final Button downloadButton = new Button(this);
+                   lp.width = 0;
+                   lp.weight = 1;
                     if ( Books[i][3] == "false" ) {
                         downloadButton.setText("Download");
                         downloadButton.setId(i);
-                        downloadButton.setWidth((int) (tableWidth*0.25));
                         downloadButton.setOnClickListener(new View.OnClickListener() {
-
                             @Override
                             public void onClick(View v) {
                                 if ( Books[v.getId()][3] == "false" ){
@@ -276,15 +274,17 @@ public class userBookMenu extends AppCompatActivity {
                         downloadButton.setId(i);
                         downloadButton.setTextSize(12);
                     }
+                    downloadButton.setLayoutParams(lp);
                     tr.addView(downloadButton);
 
                     // Creates Author Textview for second column
                 } else if ( j == 1  ) {
-
                     TextView Author = new TextView(this);
                     Author.setText(Books[i][1]);
                     Author.setId(i);
-                    Author.setWidth((int) (tableWidth*0.25));
+                   lp.width = 0;
+                   lp.weight = 1;
+                   Author.setLayoutParams(lp);
                     tr.addView(Author);
 
                     //Creates bookname with the first column
@@ -292,41 +292,44 @@ public class userBookMenu extends AppCompatActivity {
                    TextView BookName = new TextView(this);
                     BookName.setText(Books[i][0]);
                     BookName.setId(i);
-                    BookName.setWidth((int) (tableWidth*0.5));
+                   lp.width = 0;
+                   lp.weight = 2;
+                   BookName.setLayoutParams(lp);
                     tr.addView(BookName);
                 }
             }
             tr = new TableRow(this);
+            tr.setLayoutParams(trlp);
             BookTable.addView(tr);
         }
     }
 
     // Creates the table for showing owned books
-    public void createTableOwned(){
+    public void createTableOwned(final int ownedBooks){
 
 
         // Creates the table
-        final TableLayout BookTable;
+        TableRow.LayoutParams lp = new TableRow.LayoutParams();
+        TableRow.LayoutParams trlp = new TableRow.LayoutParams();
+        final TableLayout BookTable = findViewById(R.id.tableOfBooks);
         TableRow tr = null;
-        BookTable = (TableLayout) findViewById(R.id.tableOfBooks);
         BookTable.removeAllViews();
-        int tableWidth = BookTable.getWidth();
 
         // Creates new row
         tr = new TableRow(this);
-        BookTable.addView(tr);
+        trlp.height = 45;
         for (int i = 0; i < Position.length; i++){
 
             int bookPosition = getBookPositionID(Position[i][0]);
 
             for(int j = 0; j < 3; j++) {
-
                 // Creates Delete button for each record of the table in the third column
                 if ( j == 2 ){
                     final Button deleteButton = new Button(this);
+                    lp.width = 0;
+                    lp.weight = 1;
                     deleteButton.setText("Delete");
                     deleteButton.setId(bookPosition);
-                    deleteButton.setWidth((int) (tableWidth*0.25));
                     deleteButton.setOnClickListener(new View.OnClickListener() {
 
                         @Override
@@ -335,9 +338,10 @@ public class userBookMenu extends AppCompatActivity {
                             if (isDeleted){
                                 Books[v.getId()][3] = "false";
                             }
-                            createTableOwned();
+                            createTableOwned(ownedBooks-1);
                         }
                     });
+                    deleteButton.setLayoutParams(lp);
                     tr.addView(deleteButton);
 
                     // Creates Author textview for second column
@@ -346,7 +350,9 @@ public class userBookMenu extends AppCompatActivity {
                     TextView Author = new TextView(this);
                     Author.setText(Books[bookPosition][1]);
                     Author.setId(bookPosition);
-                    Author.setWidth((int) (tableWidth*0.25));
+                    lp.width = 0;
+                    lp.weight = 1;
+                    Author.setLayoutParams(lp);
                     tr.addView(Author);
 
                     // Creates book title textview for the first column
@@ -354,7 +360,9 @@ public class userBookMenu extends AppCompatActivity {
                     TextView BookName = new TextView(this);
                     BookName.setText(Books[bookPosition][0]);
                     BookName.setId(bookPosition);
-                    BookName.setWidth((int) (tableWidth*0.5));
+                    lp.width = 0;
+                    lp.weight = 2;
+                    BookName.setLayoutParams(lp);
                     BookName.setClickable(true);
                     tr.addView(BookName);
 
@@ -363,8 +371,12 @@ public class userBookMenu extends AppCompatActivity {
                         // Allows the text view be clicked and have a use
                         @Override
                         public void onClick(View v) {
+                            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(v.getContext());
+
                             // We need to pass in Bookname, which is Books[v.getId()][0]
                             // Books are saved and loaded using booknames so in the other activity we use this to load the book
+                            Intent toReadSelectedBookActivity = new Intent(getApplicationContext(), readSelectedBook.class);
+                            toReadSelectedBookActivity.putExtra("BOOK_TITLE", Books[v.getId()][0]);
                         }
                     });
                 }
@@ -424,7 +436,7 @@ public class userBookMenu extends AppCompatActivity {
         return amount;
     }
 
-    // Gets where is the position array is this book
+    // Gets where in the position array is this book
     public int getBookPositionID( String BookName){
         int position = 0;
 
@@ -453,18 +465,22 @@ public class userBookMenu extends AppCompatActivity {
                 position[i-1][0] = "";
             }
         }
-        return position
+        return position;
     }
 
     // Strings use to denote which table the user is looking at
     final static String usersLibraryTitle = "Your Library";
     final static String addToLibraryTitle = "Download Books To Your Library";
+    final static String librarySize = "USER_LIBRARY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_book_menu);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        int size = sp.getInt(librarySize, 0);
+        createTableOwned(size);
 
         // Needed to make http download work properly
         if (android.os.Build.VERSION.SDK_INT > 9) {
@@ -472,7 +488,6 @@ public class userBookMenu extends AppCompatActivity {
             StrictMode.setThreadPolicy(policy);
         }
         checkBookDownloaded();
-        createTableOwned();
 
         final TextView tv = findViewById(R.id.mainMenuTitle);
         tv.setText(usersLibraryTitle);
@@ -483,7 +498,7 @@ public class userBookMenu extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 if(tab.getPosition() == 0){
                     tv.setText(usersLibraryTitle);
-                    createTableOwned();
+                    createTableOwned(0);
                 }
                 else{
                     tv.setText(addToLibraryTitle);
