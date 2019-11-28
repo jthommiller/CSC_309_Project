@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Set;
 import java.util.prefs.Preferences;
 
 public class userBookMenu extends AppCompatActivity {
@@ -134,6 +136,8 @@ public class userBookMenu extends AppCompatActivity {
             {"The Yellow Wallpaper", "Charlotte Perkins Gilman", "https://www.gutenberg.org/files/1952/1952-0.txt", "false"}
     };
 
+    String STRING_ARRAY = "ArrayOfStrings";
+    ArrayList<String> library = new ArrayList<>();
     // Global variable so buttons set which book should be downloading
     int downloadID = 0;
     // Runs the book downloading method
@@ -301,8 +305,37 @@ public class userBookMenu extends AppCompatActivity {
         }
     }
 
+    public void createLibrary(Set<String> books){
+        int index = 0;
+        int size = books.size();
+        String[] temp = new String[size];
+        for(String title : books){
+            temp[index] = title;
+            index++;
+        }
+        for(int i = size-1; i >=0; i--) {
+            library.add(temp[i]);
+        }
+    }
+
+    public void updateBookList(String book, boolean delete){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit = preferences.edit();
+        Set<String> bookList = preferences.getStringSet(STRING_ARRAY, null);
+
+        if(delete && bookList != null){
+            bookList.remove(book);
+        }
+        else{
+            bookList.add(book);
+        }
+        edit.putStringSet(STRING_ARRAY, bookList);
+        edit.commit();
+        createLibrary(bookList);
+    }
+
     // Creates the table for showing owned books
-    public void createTableOwned(final int ownedBooks){
+    public void createTableOwned(){
 
         // Creates the table
         TableRow.LayoutParams lp = new TableRow.LayoutParams();
@@ -314,8 +347,8 @@ public class userBookMenu extends AppCompatActivity {
         // Creates new row
         tr = new TableRow(this);
         trlp.height = 45;
-        for (int i = 0; i < Books.length; i++){
 
+        for(int i = 0; i < Books.length; i++){
             for(int j = 0; j < 3; j++) {
 
                 if ( Books[i][3].equals("true") ){
@@ -334,7 +367,8 @@ public class userBookMenu extends AppCompatActivity {
                                 if (isDeleted){
                                     Books[v.getId()][3] = "false";
                                 }
-                                createTableOwned(ownedBooks-1);
+                                updateBookList(Books[v.getId()][3], true);
+                                createTableOwned();
                             }
                         });
                         deleteButton.setLayoutParams(lp);
@@ -367,12 +401,13 @@ public class userBookMenu extends AppCompatActivity {
                             // Allows the text view be clicked and have a use
                             @Override
                             public void onClick(View v) {
-                                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(v.getContext());
+                                String book = Books[v.getId()][0];
+                                updateBookList(book, false);
 
                                 // We need to pass in Bookname, which is Books[v.getId()][0]
                                 // Books are saved and loaded using booknames so in the other activity we use this to load the book
                                 Intent toReadSelectedBookActivity = new Intent(getApplicationContext(), readSelectedBook.class);
-                                toReadSelectedBookActivity.putExtra("BOOK_TITLE", Books[v.getId()][0]);
+                                toReadSelectedBookActivity.putExtra("BOOK_TITLE", book);
                             }
                         });
                     }
@@ -396,7 +431,7 @@ public class userBookMenu extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         int size = sp.getInt(librarySize, 0);
-        createTableOwned(size);
+        createTableOwned();
 
         // Needed to make http download work properly
         if (android.os.Build.VERSION.SDK_INT > 9) {
@@ -414,7 +449,7 @@ public class userBookMenu extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 if(tab.getPosition() == 0){
                     tv.setText(usersLibraryTitle);
-                    createTableOwned(0);
+                    createTableOwned();
                 }
                 else{
                     tv.setText(addToLibraryTitle);
