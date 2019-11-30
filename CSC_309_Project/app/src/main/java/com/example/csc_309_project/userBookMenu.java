@@ -154,6 +154,7 @@ public class userBookMenu extends AppCompatActivity {
             }
         }
     };
+
     // function to get one item (current data or forecast) from the server
     protected String downloadBook( String str_url ) {
         try {
@@ -327,6 +328,7 @@ public class userBookMenu extends AppCompatActivity {
             bookList.remove(book);
         }
         else{
+            System.out.println(book);
             bookList.add(book);
         }
         edit.putStringSet(STRING_ARRAY, bookList);
@@ -364,10 +366,11 @@ public class userBookMenu extends AppCompatActivity {
                             @Override
                             public void onClick(View v) {
                                 boolean isDeleted = deleteBook(Books[v.getId()][0]);
+                                System.out.println(isDeleted);
                                 if (isDeleted){
                                     Books[v.getId()][3] = "false";
                                 }
-                                updateBookList(Books[v.getId()][3], true);
+                                //updateBookList(Books[v.getId()][0], true);
                                 createTableOwned();
                             }
                         });
@@ -402,12 +405,13 @@ public class userBookMenu extends AppCompatActivity {
                             @Override
                             public void onClick(View v) {
                                 String book = Books[v.getId()][0];
-                                updateBookList(book, false);
+                                //updateBookList(book, false);
 
                                 // We need to pass in Bookname, which is Books[v.getId()][0]
                                 // Books are saved and loaded using booknames so in the other activity we use this to load the book
-                                Intent toReadSelectedBookActivity = new Intent(getApplicationContext(), readSelectedBook.class);
-                                toReadSelectedBookActivity.putExtra("BOOK_TITLE", book);
+                                Intent intent = new Intent(getBaseContext(), readSelectedBook.class);
+                                intent.putExtra("BOOK_TITLE", book);
+                                startActivity(intent);
                             }
                         });
                     }
@@ -431,7 +435,6 @@ public class userBookMenu extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         int size = sp.getInt(librarySize, 0);
-        createTableOwned();
 
         // Needed to make http download work properly
         if (android.os.Build.VERSION.SDK_INT > 9) {
@@ -439,6 +442,7 @@ public class userBookMenu extends AppCompatActivity {
             StrictMode.setThreadPolicy(policy);
         }
         checkBookDownloaded();
+        createTableOwned();
 
         final TextView tv = findViewById(R.id.mainMenuTitle);
         tv.setText(usersLibraryTitle);
