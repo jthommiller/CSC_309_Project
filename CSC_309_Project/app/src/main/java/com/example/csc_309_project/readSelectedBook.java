@@ -12,6 +12,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -25,7 +26,6 @@ public class readSelectedBook extends AppCompatActivity {
 
     int linesInBook = 0;
     String BookName = "";
-    boolean canSetScroll = false;
 
     // Loads the book
     public void loadBook(String BookName){
@@ -65,7 +65,6 @@ public class readSelectedBook extends AppCompatActivity {
         }
         TextView bookText = findViewById(R.id.bookTextView);
         bookText.setText(Book);
-        canSetScroll = true;
     }
 
     // Loads the position
@@ -128,18 +127,9 @@ public class readSelectedBook extends AppCompatActivity {
     }
 
     // Sets up Scroll View y
-    public void setScrollView(String BookName){
-        int position = loadPosition(BookName);
-        System.out.println(position);
-        boolean notDone = true;
-        TextView bookText = findViewById(R.id.bookTextView);
-        while ( notDone ){
-            if ( canSetScroll ){
-                ScrollView BSV = findViewById(R.id.scrollView2);
-                BSV.setScrollY(position);
-                notDone = !notDone;
-            }
-        }
+    public void setScrollView(String BookName, int position){
+        ScrollView BSV = findViewById(R.id.scrollView2);
+        BSV.setScrollY(position);
     }
 
 
@@ -149,15 +139,13 @@ public class readSelectedBook extends AppCompatActivity {
         setContentView(R.layout.activity_read_selected_book);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-
         BookName = getIntent().getStringExtra("BOOK_TITLE");
         loadBook(BookName);
+        setScrollView(BookName, loadPosition(BookName));
 
         getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
         );
-
-
 
         ImageButton returnToLibrary = findViewById(R.id.returnToUserBookMenu);
         returnToLibrary.setOnClickListener(new View.OnClickListener() {
@@ -174,14 +162,37 @@ public class readSelectedBook extends AppCompatActivity {
         setScroll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setScrollView(BookName);
+                setScrollView(BookName, loadPosition(BookName));
             }
         });
+
+        final SeekBar randomBar = findViewById(R.id.seekRandomPlaceBar);
+
+        randomBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()  {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                System.out.println(randomBar.getProgress());
+                double location = randomBar.getProgress();
+                location = location / 100;
+                location = linesInBook*location;
+
+                setScrollView(BookName, (int) location*67 );
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+
+
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        setScrollView(BookName);
-    }
+
 }
