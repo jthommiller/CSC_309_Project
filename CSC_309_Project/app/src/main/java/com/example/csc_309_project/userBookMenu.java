@@ -217,7 +217,19 @@ public class userBookMenu extends AppCompatActivity {
         } catch ( Exception E ){
             E.printStackTrace();
         } finally {
+            deletePosition(BookName);
             return deleted;
+        }
+    }
+
+    // Deletes the book off the phone
+    public void deletePosition( String BookName ){
+        try{
+            File dir = getFilesDir();
+            File file = new File(dir, BookName + " Position");
+            file.delete();
+        } catch ( Exception E ){
+            E.printStackTrace();
         }
     }
 
@@ -366,7 +378,6 @@ public class userBookMenu extends AppCompatActivity {
                             @Override
                             public void onClick(View v) {
                                 boolean isDeleted = deleteBook(Books[v.getId()][0]);
-                                System.out.println(isDeleted);
                                 if (isDeleted){
                                     Books[v.getId()][3] = "false";
                                 }

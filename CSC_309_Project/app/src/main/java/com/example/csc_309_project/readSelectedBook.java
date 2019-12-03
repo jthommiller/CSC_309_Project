@@ -4,12 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.icu.text.Transliterator;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
@@ -132,6 +133,12 @@ public class readSelectedBook extends AppCompatActivity {
         BSV.setScrollY(position);
     }
 
+    // Sets the font size of the book to what the user wanted
+    public void setFontSize(int FontSize){
+        TextView bookText = findViewById(R.id.bookTextView);
+        bookText.setTextSize(FontSize);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -190,6 +197,18 @@ public class readSelectedBook extends AppCompatActivity {
             }
         });
 
+        final EditText fontSizeText = findViewById(R.id.declaredFontSize);
+        fontSizeText.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+                setFontSize(Integer.parseInt(fontSizeText.getText().toString()));
+            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+        });
 
 
     }
