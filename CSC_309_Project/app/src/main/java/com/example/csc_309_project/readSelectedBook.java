@@ -179,11 +179,11 @@ public class readSelectedBook extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 System.out.println(randomBar.getProgress());
-                double location = randomBar.getProgress();
-                location = location / 100;
-                location = linesInBook*location;
+                TextView bookText = findViewById(R.id.bookTextView);
+                double location = randomBar.getProgress()/100;
+                location = linesInBook*location*67;
 
-                setScrollView(BookName, (int) location*67 );
+                setScrollView(BookName, (int) location );
             }
 
             @Override
