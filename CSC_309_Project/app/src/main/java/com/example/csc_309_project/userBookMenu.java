@@ -31,6 +31,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
@@ -138,6 +139,7 @@ public class userBookMenu extends AppCompatActivity {
 
     String STRING_ARRAY = "ArrayOfStrings";
     ArrayList<String> library = new ArrayList<>();
+    int librarySize;
     // Global variable so buttons set which book should be downloading
     int downloadID = 0;
     // Runs the book downloading method
@@ -248,6 +250,16 @@ public class userBookMenu extends AppCompatActivity {
         }
     }
 
+    public String getAuthor(String bookName){
+        int size = Books.length;
+        for(int i = 0; i < size; i++){
+            if(Books[i][0].equals(bookName)){
+                return Books[i][1];
+            }
+        }
+        return "ERROR";
+    }
+
     // Creates the table for downloading books
     public void createTableDownload(){
 
@@ -275,10 +287,12 @@ public class userBookMenu extends AppCompatActivity {
                             @Override
                             public void onClick(View v) {
                                 if ( Books[v.getId()][3] == "false" ){
+                                    String book = Books[v.getId()][0];
                                     downloadID = v.getId();
                                     Books[v.getId()][3] = "true";
                                     downloadBookThread.run();
                                     createTableDownload();
+                                    updateBookList(book, 1);
                                 }
 
                             }
@@ -318,34 +332,38 @@ public class userBookMenu extends AppCompatActivity {
         }
     }
 
-    public void createLibrary(Set<String> books){
-        int index = 0;
-        int size = books.size();
-        String[] temp = new String[size];
-        for(String title : books){
-            temp[index] = title;
-            index++;
-        }
-        for(int i = size-1; i >=0; i--) {
-            library.add(temp[i]);
-        }
-    }
-
-    public void updateBookList(String book, boolean delete){
+    public void updateSharedPreferences(){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor edit = preferences.edit();
-        Set<String> bookList = preferences.getStringSet(STRING_ARRAY, null);
 
-        if(delete && bookList != null){
-            bookList.remove(book);
+        for(int i = 0; i < librarySize; i++){
+            edit.remove("BOOK_TITLE"+i);
+            edit.putString("BOOK_TITLE"+i, library.get(i));
         }
-        else{
-            System.out.println(book);
-            bookList.add(book);
-        }
-        edit.putStringSet(STRING_ARRAY, bookList);
+        edit.putInt("SIZE", librarySize-1);
         edit.commit();
-        createLibrary(bookList);
+
+        updateLibrary();
+    }
+
+    public void updateBookList(String book, int action){
+        switch(action){
+            case 1:
+                library.add(book);
+                break;
+            case 2:
+                library.remove(book);
+                library.add(0, book);
+                break;
+            case 3:
+                library.remove(book);
+                break;
+            default:
+                System.out.println("Error: " + book + " " + action);
+                break;
+        }
+        librarySize = library.size();
+        updateSharedPreferences();
     }
 
     // Creates the table for showing owned books
@@ -362,90 +380,99 @@ public class userBookMenu extends AppCompatActivity {
         tr = new TableRow(this);
         trlp.height = 45;
 
-        for(int i = 0; i < Books.length; i++){
+        for(int i = 0; i < librarySize; i++){
             for(int j = 0; j < 3; j++) {
+                // Creates Delete button for each record of the table in the third column
+                if ( j == 2 ){
+                    final Button deleteButton = new Button(this);
+                    lp.width = 0;
+                    lp.weight = 1;
+                    deleteButton.setText("Delete");
+                    deleteButton.setId(i);
+                    deleteButton.setOnClickListener(new View.OnClickListener() {
 
-                if ( Books[i][3].equals("true") ){
-                    // Creates Delete button for each record of the table in the third column
-                    if ( j == 2 ){
-                        final Button deleteButton = new Button(this);
-                        lp.width = 0;
-                        lp.weight = 1;
-                        deleteButton.setText("Delete");
-                        deleteButton.setId(i);
-                        deleteButton.setOnClickListener(new View.OnClickListener() {
-
-                            @Override
-                            public void onClick(View v) {
-                                boolean isDeleted = deleteBook(Books[v.getId()][0]);
-                                if (isDeleted){
-                                    Books[v.getId()][3] = "false";
-                                }
-                                //updateBookList(Books[v.getId()][0], true);
-                                createTableOwned();
+                        @Override
+                        public void onClick(View v) {
+                            boolean isDeleted = deleteBook(library.get(v.getId()));
+                            if (isDeleted){
+                                Books[v.getId()][3] = "false";
                             }
-                        });
-                        deleteButton.setLayoutParams(lp);
-                        tr.addView(deleteButton);
+                            updateBookList(library.get(v.getId()), 3);
+                            createTableOwned();
+                        }
+                    });
+                    deleteButton.setLayoutParams(lp);
+                    tr.addView(deleteButton);
 
-                        // Creates Author textview for second column
-                    } else if (j == 1) {
+                    // Creates Author textview for second column
+                } else if (j == 1) {
+                    TextView Author = new TextView(this);
+                    Author.setText(getAuthor(library.get(i)));
+                    Author.setId(i);
+                    lp.width = 0;
+                    lp.weight = 1;
+                    Author.setLayoutParams(lp);
+                    tr.addView(Author);
 
-                        TextView Author = new TextView(this);
-                        Author.setText(Books[i][1]);
-                        Author.setId(i);
-                        lp.width = 0;
-                        lp.weight = 1;
-                        Author.setLayoutParams(lp);
-                        tr.addView(Author);
+                    // Creates book title textview for the first column
+                } else {
+                    TextView BookName = new TextView(this);
+                    BookName.setText(library.get(i));
+                    BookName.setId(i);
+                    lp.width = 0;
+                    lp.weight = 2;
+                    BookName.setLayoutParams(lp);
+                    BookName.setClickable(true);
+                    tr.addView(BookName);
 
-                        // Creates book title textview for the first column
-                    } else {
-                        TextView BookName = new TextView(this);
-                        BookName.setText(Books[i][0]);
-                        BookName.setId(i);
-                        lp.width = 0;
-                        lp.weight = 2;
-                        BookName.setLayoutParams(lp);
-                        BookName.setClickable(true);
-                        tr.addView(BookName);
+                    BookName.setOnClickListener(new View.OnClickListener() {
 
-                        BookName.setOnClickListener(new View.OnClickListener() {
+                        // Allows the text view be clicked and have a use
+                        @Override
+                        public void onClick(View v) {
+                            String book = library.get(v.getId());
+                            updateBookList(book, 2);
 
-                            // Allows the text view be clicked and have a use
-                            @Override
-                            public void onClick(View v) {
-                                String book = Books[v.getId()][0];
-                                //updateBookList(book, false);
-
-                                // We need to pass in Bookname, which is Books[v.getId()][0]
-                                // Books are saved and loaded using booknames so in the other activity we use this to load the book
-                                Intent intent = new Intent(getBaseContext(), readSelectedBook.class);
-                                intent.putExtra("BOOK_TITLE", book);
-                                startActivity(intent);
-                            }
-                        });
-                    }
+                            // We need to pass in Bookname, which is Books[v.getId()][0]
+                            // Books are saved and loaded using booknames so in the other activity we use this to load the book
+                            Intent intent = new Intent(getBaseContext(), readSelectedBook.class);
+                            intent.putExtra("BOOK_TITLE", book);
+                            startActivity(intent);
+                        }
+                    });
                 }
-
             }
             tr = new TableRow(this);
             BookTable.addView(tr);
         }
     }
+    public void updateLibrary(){
+        library.clear();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        int index = preferences.getInt("SIZE", 0);
+        for(int i = index; i >= 0; i--){
+            library.add(preferences.getString("BOOK_TITLE"+i, null));
+        }
+        librarySize = library.size();
+    }
+
+    public void removePrefs(){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit = preferences.edit();
+        edit.clear();
+        edit.apply();
+        library.clear();
+    }
 
     // Strings use to denote which table the user is looking at
     final static String usersLibraryTitle = "Your Library";
     final static String addToLibraryTitle = "Download Books To Your Library";
-    final static String librarySize = "USER_LIBRARY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_book_menu);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        int size = sp.getInt(librarySize, 0);
 
         // Needed to make http download work properly
         if (android.os.Build.VERSION.SDK_INT > 9) {
@@ -464,6 +491,7 @@ public class userBookMenu extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 if(tab.getPosition() == 0){
                     tv.setText(usersLibraryTitle);
+                    updateLibrary();
                     createTableOwned();
                 }
                 else{
@@ -480,6 +508,18 @@ public class userBookMenu extends AppCompatActivity {
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
 
+            }
+        });
+
+        Button purge = findViewById(R.id.purge);
+        purge.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                for(int i = 0; i < Books.length; i++){
+                    deleteBook(Books[i][0]);
+                }
+                removePrefs();
+                checkBookDownloaded();
             }
         });
 
