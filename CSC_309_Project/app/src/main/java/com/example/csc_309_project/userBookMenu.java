@@ -142,78 +142,10 @@ public class userBookMenu extends AppCompatActivity {
             {"The Yellow Wallpaper", "Charlotte Perkins Gilman", "https://www.gutenberg.org/files/1952/1952-0.txt", "false"}
     };
 
+    // Variable Initialization
     FrameLayout downloadScreen;
-    String STRING_ARRAY = "ArrayOfStrings";
     ArrayList<String> library = new ArrayList<>();
     int librarySize;
-    // Global variable so buttons set which book should be downloading
-    int downloadID = 0;
-    // Runs the book downloading method
-    Thread downloadBookThread = new Thread(){
-        public void run() {
-            try{
-                String book = downloadBook(Books[downloadID][2]);
-                saveBook(book, Books[downloadID][0]);
-                Books[downloadID][3] = "true";
-
-            } catch (Exception e){
-                System.out.println(e);
-                e.printStackTrace();
-            }
-        }
-    };
-
-    // function to get one item (current data or forecast) from the server
-    protected String downloadBook( String str_url ) {
-        try {
-            // assemble the string and the search request
-            StringBuilder response = new StringBuilder();
-            URL url = new URL(str_url);
-
-            // make the connection
-            HttpURLConnection httpconn = (HttpURLConnection) url.openConnection();
-
-            // did it do ok?
-            if ( httpconn.getResponseCode() == HttpURLConnection.HTTP_OK ) {
-                BufferedReader input = new BufferedReader(
-                        new InputStreamReader(httpconn.getInputStream()), 8192);
-                String strLine = null;
-                while ((strLine = input.readLine()) != null) {
-                    // have more data
-                    response.append(strLine);
-                    response.append("\n");
-                }
-                input.close();
-                return response.toString();
-            }
-        } catch ( IOException e ) {
-            System.out.println(e);
-            return "false";
-        }
-        return "false";
-    }
-
-    // Saves the book into the phone for offline use
-    public void saveBook(String Book, String BookName){
-        // Sets up file output stream to be able to save the book
-        FileOutputStream fos = null;
-        try {
-            fos = openFileOutput(BookName, MODE_PRIVATE);
-            fos.write(Book.getBytes());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (fos != null){
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
 
     // Deletes the book off the phone
     public boolean deleteBook( String BookName ){
@@ -230,7 +162,7 @@ public class userBookMenu extends AppCompatActivity {
         }
     }
 
-    // Deletes the book off the phone
+    // Deletes the position off the phone
     public void deletePosition( String BookName ){
         try{
             File dir = getFilesDir();
@@ -256,6 +188,7 @@ public class userBookMenu extends AppCompatActivity {
         }
     }
 
+    // Gets the author from the main list for table owned purposes
     public String getAuthor(String bookName){
         int size = Books.length;
         for(int i = 0; i < size; i++){
@@ -281,79 +214,98 @@ public class userBookMenu extends AppCompatActivity {
         tr.setLayoutParams(trlp);
         BookTable.addView(tr);
         trlp.height = 45;
+
+        // Starts running through each book
         for (int i = 0; i < Books.length; i++){
             for(int j = 0; j < 3; j++){
+
                 // Creates download button for each record of the table in the third column
                if ( j == 2 ) {
                     final Button downloadButton = new Button(this);
                    lp.width = 0;
                    lp.weight = 1;
+
+                   // If the book isn't downloaded make the button say download and add functionality
                     if ( Books[i][3] == "false" ) {
                         downloadButton.setText("Download");
                         downloadButton.setId(i);
+
+                        // Allows the user to click on the download button and download it
                         downloadButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                if ( Books[v.getId()][3] == "false" ){
-                                    String book = Books[v.getId()][0];
-                                    Books[v.getId()][3] = "true";
-                                    /*downloadButton.setText("Downloading...");
-                                    downloadBookThread.run();*/
-                                    new DownloadBook(getApplicationContext(), downloadScreen, downloadButton, Books[v.getId()][2], book).execute();
-                                    updateBookList(book, 1);
-                                }
-
+                                String book = Books[v.getId()][0];
+                                Books[v.getId()][3] = "true";
+                                new DownloadBook(getApplicationContext(), downloadScreen, downloadButton, Books[v.getId()][2], book).execute();
+                                updateBookList(book, 1);
                             }
                         });
+
+                    // For when the user views the download table it will say downloaded now
                     } else {
                         downloadButton.setText("Downloaded");
                         downloadButton.setId(i);
                         downloadButton.setTextSize(12);
                     }
+
+                    // Adds to the table row
                     downloadButton.setLayoutParams(lp);
                     tr.addView(downloadButton);
 
-                    // Creates Author Textview for second column
+                    // Adds the author to the second column table
                 } else if ( j == 1  ) {
                     TextView Author = new TextView(this);
                     Author.setText(Books[i][1]);
                     Author.setId(i);
-                   lp.width = 0;
-                   lp.weight = 1;
-                   Author.setLayoutParams(lp);
+                    lp.width = 0;
+                    lp.weight = 1;
+
+                   // Adds to the table row
+                    Author.setLayoutParams(lp);
                     tr.addView(Author);
 
-                    //Creates bookname with the first column
+                    // Adds the book name to the first column or table
                 } else {
                    TextView BookName = new TextView(this);
                     BookName.setText(Books[i][0]);
                     BookName.setId(i);
                    lp.width = 0;
                    lp.weight = 2;
+
+                   // Adds to the table row
                    BookName.setLayoutParams(lp);
                     tr.addView(BookName);
                 }
             }
+
+            // Places the just created row into the table
             tr = new TableRow(this);
             tr.setLayoutParams(trlp);
             BookTable.addView(tr);
         }
     }
 
+
+    // Updates the shared preferences to account for new or removed books
     public void updateSharedPreferences(){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor edit = preferences.edit();
 
+        // Runs through the entire preferences getting the updated data
         for(int i = 0; i < librarySize; i++){
             edit.remove("BOOK_TITLE"+i);
             edit.putString("BOOK_TITLE"+i, library.get(i));
         }
+
+        // Puts the new size of book library in shared preferences
         edit.putInt("SIZE", librarySize-1);
         edit.commit();
 
+        // Updates the library for new books
         updateLibrary();
     }
 
+    // Handles adding, modifying, or removing of books from the users library
     public void updateBookList(String book, int action){
         switch(action){
             case 1:
@@ -370,6 +322,8 @@ public class userBookMenu extends AppCompatActivity {
                 System.out.println("Error: " + book + " " + action);
                 break;
         }
+
+        // Sets the new size and updates shared preferences to account for this new action
         librarySize = library.size();
         updateSharedPreferences();
     }
@@ -389,19 +343,25 @@ public class userBookMenu extends AppCompatActivity {
         tr.setLayoutParams(trlp);
         BookTable.addView(tr);
         trlp.height = 45;
+
+        // Starts running through each book in library
         for(int i = 0; i < librarySize; i++){
             for(int j = 0; j < 3; j++) {
-                // Creates Delete button for each record of the table in the third column
+
+                // Creates the delete button in the final column
                 if ( j == 2 ){
                     final Button deleteButton = new Button(this);
                     lp.width = 0;
                     lp.weight = 1;
                     deleteButton.setText("Delete");
                     deleteButton.setId(i);
-                    deleteButton.setOnClickListener(new View.OnClickListener() {
 
+                    // Allows the user to remove the book from the library
+                    deleteButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+
+                            // When clicked attempt to delete the book from library if successful change the value and update book list and recreate the table
                             boolean isDeleted = deleteBook(library.get(v.getId()));
                             if (isDeleted){
                                 Books[v.getId()][3] = "false";
@@ -410,20 +370,24 @@ public class userBookMenu extends AppCompatActivity {
                             createTableOwned();
                         }
                     });
+
+                    // Adds the button to the table
                     deleteButton.setLayoutParams(lp);
                     tr.addView(deleteButton);
 
-                    // Creates Author textview for second column
+                    // Places the authors name in the second column
                 } else if (j == 1) {
                     TextView Author = new TextView(this);
                     Author.setText(getAuthor(library.get(i)));
                     Author.setId(i);
                     lp.width = 0;
                     lp.weight = 1;
+
+                    // Adds the author to table
                     Author.setLayoutParams(lp);
                     tr.addView(Author);
 
-                    // Creates book title textview for the first column
+                    // Places the book name into the fist column
                 } else {
                     TextView BookName = new TextView(this);
                     BookName.setText(library.get(i));
@@ -434,16 +398,16 @@ public class userBookMenu extends AppCompatActivity {
                     BookName.setClickable(true);
                     tr.addView(BookName);
 
+                    // Allows the user to click on the bookname and read the book
                     BookName.setOnClickListener(new View.OnClickListener() {
-
-                        // Allows the text view be clicked and have a use
                         @Override
                         public void onClick(View v) {
+
+                            // Grabs the book and updates the booklist to place this at most recently read
                             String book = library.get(v.getId());
                             updateBookList(book, 2);
 
-                            // We need to pass in Bookname, which is Books[v.getId()][0]
-                            // Books are saved and loaded using booknames so in the other activity we use this to load the book
+                            // Passes the book name into the read activity
                             Intent intent = new Intent(getBaseContext(), readSelectedBook.class);
                             intent.putExtra("BOOK_TITLE", book);
                             startActivity(intent);
@@ -451,11 +415,17 @@ public class userBookMenu extends AppCompatActivity {
                     });
                 }
             }
+
+            // Add this row to the table
             tr = new TableRow(this);
             BookTable.addView(tr);
         }
     }
+
+    // This updates the arraylist library
     public void updateLibrary(){
+
+        // Clear the library and add the new library to get most recent data
         library.clear();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         int index = preferences.getInt("SIZE", 0);
@@ -463,14 +433,6 @@ public class userBookMenu extends AppCompatActivity {
             library.add(preferences.getString("BOOK_TITLE"+i, null));
         }
         librarySize = library.size();
-    }
-
-    public void removePrefs(){
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor edit = preferences.edit();
-        edit.clear();
-        edit.apply();
-        library.clear();
     }
 
     // Strings use to denote which table the user is looking at
@@ -490,13 +452,17 @@ public class userBookMenu extends AppCompatActivity {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
+
+        // Updates the library to most recent data if any
         updateLibrary();
         checkBookDownloaded();
         createTableOwned();
 
+        // Sets text view to tell which table we are in
         final TextView tv = findViewById(R.id.mainMenuTitle);
         tv.setText(usersLibraryTitle);
 
+        // Sets up the tab selector to neatly change tables
         final TabLayout tl = findViewById(R.id.navigationTabBar);
         tl.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -512,47 +478,30 @@ public class userBookMenu extends AppCompatActivity {
                 }
             }
 
+            // These two are needed to make the listener work
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
 
             }
-
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
 
             }
         });
-
-        Button purge = findViewById(R.id.purge);
-        purge.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                for(int i = 0; i < Books.length; i++){
-                    deleteBook(Books[i][0]);
-                }
-                removePrefs();
-                checkBookDownloaded();
-            }
-        });
-
-        Button test = findViewById(R.id.test);
-        test.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                Intent startIntent = new Intent(getApplicationContext(), readSelectedBook.class);
-                startActivity(startIntent);
-            }
-        });
     }
 }
 
+// An async task to download the book
 class DownloadBook extends AsyncTask<Void, Void, Void> {
+
+    // Variable Initialization
     Context context;
     FrameLayout downloadScreen;
     Button download;
     String str_url;
     String book;
 
+    // Sets up our variables with values
     DownloadBook(Context context, FrameLayout downloadScreen, Button download, String url, String book) {
         this.context = context;
         this.downloadScreen = downloadScreen;
@@ -561,6 +510,7 @@ class DownloadBook extends AsyncTask<Void, Void, Void> {
         this.book = book;
     }
 
+    // Darken everything and allow the progress bar to be seen
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
@@ -570,44 +520,51 @@ class DownloadBook extends AsyncTask<Void, Void, Void> {
         downloadScreen.setVisibility(View.VISIBLE);
     }
 
+    // Starts the book download and saves it into the phone
     @Override
     protected Void doInBackground(Void... params) {
         boolean fail = false;
         String fullBook = "";
+
         // Needed to make http download work properly
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         try {
-            // assemble the string and the search request
+
+            // Assemble the string and the search request
             StringBuilder response = new StringBuilder();
             URL url = new URL(str_url);
 
-            // make the connection
+            // Make the connection
             HttpURLConnection httpconn = (HttpURLConnection) url.openConnection();
 
-            // did it do ok?
+            // Did it do ok?
             if ( httpconn.getResponseCode() == HttpURLConnection.HTTP_OK ) {
                 BufferedReader input = new BufferedReader(
                         new InputStreamReader(httpconn.getInputStream()), 8192);
                 String strLine = null;
                 while ((strLine = input.readLine()) != null) {
-                    // have more data
+
+                    // Have more data
                     response.append(strLine);
                     response.append("\n");
                     if(isCancelled()){
                         break;
                     }
                 }
+
+                // Close the file reader and give the book to a string for saving
                 input.close();
                 fullBook = response.toString();
-                System.out.println(fullBook);
             }
         } catch ( IOException e ) {
-            System.out.println("BALLLLLLLLLLS");
             System.out.println(e);
             fail = true;
         }
+
+        // If downloading the book didn't fail
         if(!fail){
+
             // Sets up file output stream to be able to save the book
             FileOutputStream fos = null;
             try {
@@ -630,6 +587,7 @@ class DownloadBook extends AsyncTask<Void, Void, Void> {
         return null;
     }
 
+    // After the book has finished downloading allow everything to be seen clearly again and set download text to downloaded
     @Override
     protected void onPostExecute(Void v) {
         super.onPostExecute(v);

@@ -90,25 +90,6 @@
 
     </com.google.android.material.tabs.TabLayout>
 
-    <Button
-        android:id="@+id/test"
-        android:layout_width="158dp"
-        android:layout_height="5dp"
-        android:text="Button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/purge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="13dp"
-        android:layout_marginLeft="13dp"
-        android:layout_marginTop="44dp"
-        android:text="Delete Everything"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/test" />
-
     <FrameLayout
         android:id="@+id/downloadScreen"
         android:layout_width="match_parent"

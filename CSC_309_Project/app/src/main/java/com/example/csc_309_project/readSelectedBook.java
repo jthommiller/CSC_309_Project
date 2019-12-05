@@ -205,12 +205,17 @@ public class readSelectedBook extends AppCompatActivity {
 
 }
 
+// Async to load books
 class LoadBook extends AsyncTask<String, String, String> {
+
+    // Book Initialization
     Context context;
     FrameLayout loadingScreen;
     String bookname;
     TextView book;
 
+
+    // Sets up our variables with values
     LoadBook(Context context, FrameLayout loadingScreen, String bookname, TextView book) {
         this.context = context;
         this.loadingScreen = loadingScreen;
@@ -218,6 +223,7 @@ class LoadBook extends AsyncTask<String, String, String> {
         this.book = book;
     }
 
+    // Darken everything out and show progress bar
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
@@ -227,6 +233,7 @@ class LoadBook extends AsyncTask<String, String, String> {
         loadingScreen.setVisibility(View.VISIBLE);
     }
 
+    // Loads the book
     @Override
     protected String doInBackground(String... strings) {
         String Book = "";
@@ -270,6 +277,7 @@ class LoadBook extends AsyncTask<String, String, String> {
         return Book;
     }
 
+    // When done get rid or progress bar
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
