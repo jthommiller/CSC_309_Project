@@ -28,6 +28,27 @@ public class readSelectedBook extends AppCompatActivity {
     int linesInBook = 0;
     String BookName = "";
 
+    Thread loadBookThread = new Thread(){
+        public void run() {
+            try{
+                loadBook();
+                setScrollView(BookName, loadPosition(BookName));
+            } catch (Exception e){
+                System.out.println(e);
+                e.printStackTrace();
+            }
+        }
+    };
+
+    public void loadBook() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                loadBook(BookName);
+            }
+        });
+    }
+
     // Loads the book
     public void loadBook(String BookName){
         String Book = "";
@@ -160,7 +181,7 @@ public class readSelectedBook extends AppCompatActivity {
 
         // Gets the Book name that should fill in the book text view
         BookName = getIntent().getStringExtra("BOOK_TITLE");
-        loadBook(BookName);
+        loadBookThread.start();
 
         // SHOULD set the scrollview to the last saved position in the book
         setScrollView(BookName, loadPosition(BookName));

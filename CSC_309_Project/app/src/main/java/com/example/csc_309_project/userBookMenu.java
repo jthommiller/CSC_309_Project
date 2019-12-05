@@ -45,31 +45,31 @@ public class userBookMenu extends AppCompatActivity {
             {"The Adventures of Tom Sawyer", "Mark Twain", "https://www.gutenberg.org/files/74/74-0.txt", "false"},
             {"Alice's Adventures in Wonderland", "Lewis Carroll", "https://www.gutenberg.org/files/11/11-0.txt", "false"},
             {"Also sprach Zarathustra. English", "Friedrich Wilhelm Nietzsche", "https://www.gutenberg.org/files/1998/1998-0.txt", "false"},
-            {"An Occurrence at Owl Creek Bridge", "Ambrose Bierce", "https://www.gutenberg.org/ebooks/375.txt.utf-8", "false"},
+            {"An Occurrence at Owl Creek Bridge", "Ambrose Bierce", "https://www.gutenberg.org/cache/epub/375/pg375.txt", "false"},
             {"Anne of Green Gables", "L. M.  Montgomery", "https://www.gutenberg.org/files/45/45-0.txt", "false"},
-            {"Anthem", "Ayn Rand", "https://www.gutenberg.org/ebooks/1250.txt.utf-8", "false"},
-            {"Autobiography of Benjamin Franklin", "Benjamin Franklin", "https://www.gutenberg.org/ebooks/20203.txt.utf-8", "false"},
+            {"Anthem", "Ayn Rand", "https://www.gutenberg.org/cache/epub/1250/pg1250.txt", "false"},
+            {"Autobiography of Benjamin Franklin", "Benjamin Franklin", "https://www.gutenberg.org/cache/epub/20203/pg20203.txt", "false"},
             {"The Awakening, and Selected Short Stories", "Kate Chopin", "https://www.gutenberg.org/files/160/160-0.txt", "false"},
-            {"Beowulf: An Anglo-Saxon Epic Poem", "", "https://www.gutenberg.org/ebooks/16328.txt.utf-8", "false"},
-            {"Beyond Good and Evil", "Friedrich Wilhelm Nietzsche", "https://www.gutenberg.org/ebooks/4363.txt.utf-8", "false"},
+            {"Beowulf: An Anglo-Saxon Epic Poem", "", "https://www.gutenberg.org/cache/epub/16328/pg16328.txt", "false"},
+            {"Beyond Good and Evil", "Friedrich Wilhelm Nietzsche", "https://www.gutenberg.org/cache/epub/4363/pg4363.txt", "false"},
             {"The Brothers Karamazov", "Fyodor Dostoyevsky", "https://www.gutenberg.org/files/28054/28054-0.txt", "false"},
-            {"Candide", "Voltaire", "https://www.gutenberg.org/ebooks/19942.txt.utf-8", "false"},
+            {"Candide", "Voltaire", "https://www.gutenberg.org/cache/epub/19942/pg19942.txt", "false"},
             {"The Chaldean Account of Genesis", "A. H.  Sayce and George Smith", "https://www.gutenberg.org/files/60559/60559-0.txt", "false"},
             {"A Christmas Carol in Prose; Being a Ghost Story of Christmas", "Charles Dickens", "https://www.gutenberg.org/files/46/46-0.txt", "false"},
-            {"Common Sense", "Thomas Paine", "https://www.gutenberg.org/ebooks/147.txt.utf-8", "false"},
+            {"Common Sense", "Thomas Paine", "https://www.gutenberg.org/cache/epub/147/pg147.txt", "false"},
             {"The Complete Works of William Shakespeare", "William Shakespeare", "https://www.gutenberg.org/files/100/100-0.txt", "false"},
-            {"The Confessions of St. Augustine", "Bishop of Hippo Saint Augustine", "https://www.gutenberg.org/ebooks/3296.txt.utf-8", "false"},
+            {"The Confessions of St. Augustine", "Bishop of Hippo Saint Augustine", "https://www.gutenberg.org/cache/epub/3296/pg3296.txt", "false"},
             {"The Count of Monte Cristo", "Alexandre Dumas", "https://www.gutenberg.org/files/1184/1184-0.txt", "false"},
             {"Crime and Punishment", "Fyodor Dostoyevsky", "https://www.gutenberg.org/files/2554/2554-0.txt", "false"},
             {"The Criticism of the Fourth Gospel", "W.  Sanday", "https://www.gutenberg.org/files/60553/60553-0.txt", "false"},
-            {"Democracy in America — Volume 1", "Alexis de Tocqueville", "https://www.gutenberg.org/ebooks/815.txt.utf-8", "false"},
-            {"The Devil's Dictionary", "Ambrose Bierce", "https://www.gutenberg.org/ebooks/972.txt.utf-8", "false"},
-            {"Divine Comedy, Longfellow's Translation, Hell", "Dante Alighieri", "https://www.gutenberg.org/ebooks/1001.txt.utf-8", "false"},
-            {"A Doll's House: a play", "Henrik Ibsen", "https://www.gutenberg.org/ebooks/2542.txt.utf-8", "false"},
-            {"Dracula", "Bram Stoker", "https://www.gutenberg.org/ebooks/345.txt.utf-8", "false"},
+            {"Democracy in America — Volume 1", "Alexis de Tocqueville", "https://www.gutenberg.org/cache/epub/815/pg815.txt", "false"},
+            {"The Devil's Dictionary", "Ambrose Bierce", "https://www.gutenberg.org/cache/epub/972/pg972.txt", "false"},
+            {"Divine Comedy, Longfellow's Translation, Hell", "Dante Alighieri", "https://www.gutenberg.org/cache/epub/1001/pg1001.txt", "false"},
+            {"A Doll's House: a play", "Henrik Ibsen", "https://www.gutenberg.org/cache/epub/2542/pg2542.txt", "false"},
+            {"Dracula", "Bram Stoker", "https://www.gutenberg.org/cache/epub/345/pg345.txt", "false"},
             {"Dubliners", "James Joyce", "https://www.gutenberg.org/files/2814/2814-0.txt", "false"},
             {"Emma", "Jane Austen", "https://www.gutenberg.org/files/158/158-0.txt", "false"},
-            {"Essays by Ralph Waldo Emerson", "Ralph Waldo Emerson", "https://www.gutenberg.org/ebooks/16643.txt.utf-8", "false"},
+            {"Essays by Ralph Waldo Emerson", "Ralph Waldo Emerson", "https://www.gutenberg.org/cache/epub/16643/pg16643.txt", "false"},
             {"Essays of Michel de Montaigne — Complete", "Michel de Montaigne", "https://www.gutenberg.org/files/3600/3600-0.txt", "false"},
             {"Ethan Frome", "Edith Wharton", "https://www.gutenberg.org/files/4517/4517-0.txt", "false"},
             {"Frankenstein; Or, The Modern Prometheus", "Mary Wollstonecraft Shelley", "https://www.gutenberg.org/files/84/84-0.txt", "false"},
@@ -78,11 +78,11 @@ public class userBookMenu extends AppCompatActivity {
             {"Gulliver's Travels into Several Remote Nations of the World", "Jonathan Swift", "https://www.gutenberg.org/files/829/829-0.txt", "false"},
             {"Heart of Darkness", "Joseph Conrad", "https://www.gutenberg.org/files/219/219-0.txt", "false"},
             {"The Hound of the Baskervilles", "Arthur Conan Doyle", "https://www.gutenberg.org/files/2852/2852-0.txt", "false"},
-            {"How the Other Half Lives: Studies Among the Tenements of New York", "Jacob A.  Riis", "https://www.gutenberg.org/ebooks/45502.txt.utf-8", "false"},
-            {"The Iliad", "Homer", "https://www.gutenberg.org/ebooks/6130.txt.utf-8", "false"},
-            {"The Importance of Being Earnest: A Trivial Comedy for Serious People", "Oscar Wilde", "https://www.gutenberg.org/ebooks/844.txt.utf-8", "false"},
+            {"How the Other Half Lives: Studies Among the Tenements of New York", "Jacob A.  Riis", "https://www.gutenberg.org/cache/epub/45502/pg45502.txt", "false"},
+            {"The Iliad", "Homer", "https://www.gutenberg.org/cache/epub/6130/pg6130.txt", "false"},
+            {"The Importance of Being Earnest: A Trivial Comedy for Serious People", "Oscar Wilde", "https://www.gutenberg.org/cache/epub/844/pg844.txt", "false"},
             {"Incidents in the Life of a Slave Girl, Written by Herself", "Harriet A.  Jacobs", "https://www.gutenberg.org/ebooks/11030.txt.utf-8", "false"},
-            {"The Interesting Narrative of the Life of Olaudah Equiano, Or Gustavus Vassa, The African", "Equiano", "https://www.gutenberg.org/ebooks/15399.txt.utf-8", "false"},
+            {"The Interesting Narrative of the Life of Olaudah Equiano, Or Gustavus Vassa, The African", "Equiano", "https://www.gutenberg.org/cache/epub/15399/pg15399.txt", "false"},
             {"Ion", "Plato", "https://www.gutenberg.org/ebooks/1635.txt.utf-8", "false"},
             {"Jane Eyre: An Autobiography", "Charlotte Brontë", "https://www.gutenberg.org/ebooks/1260.txt.utf-8", "false"},
             {"The Jungle", "Upton Sinclair", "https://www.gutenberg.org/files/140/140-0.txt", "false"},
@@ -272,6 +272,8 @@ public class userBookMenu extends AppCompatActivity {
 
         // Creates new row
         tr = new TableRow(this);
+        tr.setLayoutParams(trlp);
+        BookTable.addView(tr);
         trlp.height = 45;
         for (int i = 0; i < Books.length; i++){
             for(int j = 0; j < 3; j++){
@@ -378,8 +380,9 @@ public class userBookMenu extends AppCompatActivity {
 
         // Creates new row
         tr = new TableRow(this);
+        tr.setLayoutParams(trlp);
+        BookTable.addView(tr);
         trlp.height = 45;
-
         for(int i = 0; i < librarySize; i++){
             for(int j = 0; j < 3; j++) {
                 // Creates Delete button for each record of the table in the third column
