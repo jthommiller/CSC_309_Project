@@ -31,71 +31,8 @@ import java.io.InputStreamReader;
 
 public class readSelectedBook extends AppCompatActivity {
 
-    public static int linesInBook = 0;
     String BookName = "";
-
-    Thread loadBookThread = new Thread(){
-        public void run() {
-            try{
-                loadBook();
-                setScrollView(BookName, loadPosition(BookName));
-            } catch (Exception e){
-                System.out.println(e);
-                e.printStackTrace();
-            }
-        }
-    };
-
-    public void loadBook() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                loadBook(BookName);
-            }
-        });
-    }
-    // Loads the book
-    public void loadBook(String BookName){
-        String Book = "";
-        try{
-
-            FileInputStream fis = null;
-
-            // Trys to open the book and put it into a string
-            try {
-                fis = openFileInput(BookName);
-                InputStreamReader isr = new InputStreamReader(fis);
-                BufferedReader br = new BufferedReader(isr);
-                String text;
-
-                // Puts the saved file all into a readable form string
-                while((text = br.readLine()) != null){
-                    Book += text + "\n";
-                    linesInBook++;
-                }
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (fis != null){
-                    try {
-                        fis.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } catch (Exception e){
-            System.out.println(e);
-            e.printStackTrace();
-        }
-
-        // Fills the TextView in with the string data
-        TextView bookText = findViewById(R.id.bookTextView);
-        bookText.setText(Book);
-    }
+    static int linesInBook = 0;
 
     // Loads the position
     public int loadPosition(String BookName){
@@ -166,7 +103,7 @@ public class readSelectedBook extends AppCompatActivity {
     }
 
     // Sets up Scroll View y
-    public void setScrollView(String BookName, int position){
+    public void setScrollView(int position){
         ScrollView BSV = findViewById(R.id.scrollView2);
         BSV.setScrollY(position);
     }
@@ -188,10 +125,6 @@ public class readSelectedBook extends AppCompatActivity {
         BookName = getIntent().getStringExtra("BOOK_TITLE");
         FrameLayout loadingScreen = findViewById(R.id.loadingScreen);
         TextView book = findViewById(R.id.bookTextView);
-        //loadBookThread.start();
-
-        // SHOULD set the scrollview to the last saved position in the book
-        setScrollView(BookName, loadPosition(BookName));
 
         getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
@@ -214,7 +147,7 @@ public class readSelectedBook extends AppCompatActivity {
         setScroll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setScrollView(BookName, loadPosition(BookName));
+                setScrollView(loadPosition(BookName));
             }
         });
 
@@ -227,10 +160,16 @@ public class readSelectedBook extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 TextView bookText = findViewById(R.id.bookTextView);
 
-                // Math to figure out how far down we should scroll
-                double location = randomBar.getProgress()/100;
-                location = linesInBook*location*67;
-                setScrollView(BookName, (int) location );
+                double location = randomBar.getProgress();
+                if ( location == 0 ){
+                    setScrollView( 0 );
+                } else {
+                    location = location/100;
+                    location = linesInBook*location*67;
+                    System.out.println(linesInBook + " lines");
+                    setScrollView( (int) location );
+                }
+
             }
 
             // Both of these are needed in order for the listener to work
