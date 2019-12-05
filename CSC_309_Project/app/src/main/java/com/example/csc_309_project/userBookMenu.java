@@ -6,15 +6,20 @@ Project: Create an android app that can download and read an Ebook
 package com.example.csc_309_project;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -137,6 +142,7 @@ public class userBookMenu extends AppCompatActivity {
             {"The Yellow Wallpaper", "Charlotte Perkins Gilman", "https://www.gutenberg.org/files/1952/1952-0.txt", "false"}
     };
 
+    FrameLayout downloadScreen;
     String STRING_ARRAY = "ArrayOfStrings";
     ArrayList<String> library = new ArrayList<>();
     int librarySize;
@@ -290,10 +296,10 @@ public class userBookMenu extends AppCompatActivity {
                             public void onClick(View v) {
                                 if ( Books[v.getId()][3] == "false" ){
                                     String book = Books[v.getId()][0];
-                                    downloadID = v.getId();
                                     Books[v.getId()][3] = "true";
-                                    downloadBookThread.run();
-                                    createTableDownload();
+                                    /*downloadButton.setText("Downloading...");
+                                    downloadBookThread.run();*/
+                                    new DownloadBook(getApplicationContext(), downloadScreen, downloadButton, Books[v.getId()][2], book).execute();
                                     updateBookList(book, 1);
                                 }
 
@@ -477,11 +483,14 @@ public class userBookMenu extends AppCompatActivity {
         setContentView(R.layout.activity_user_book_menu);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+        downloadScreen = findViewById(R.id.downloadScreen);
+
         // Needed to make http download work properly
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
+        updateLibrary();
         checkBookDownloaded();
         createTableOwned();
 
@@ -534,5 +543,100 @@ public class userBookMenu extends AppCompatActivity {
                 startActivity(startIntent);
             }
         });
+    }
+}
+
+class DownloadBook extends AsyncTask<Void, Void, Void> {
+    Context context;
+    FrameLayout downloadScreen;
+    Button download;
+    String str_url;
+    String book;
+
+    DownloadBook(Context context, FrameLayout downloadScreen, Button download, String url, String book) {
+        this.context = context;
+        this.downloadScreen = downloadScreen;
+        this.download = download;
+        str_url = url;
+        this.book = book;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        AlphaAnimation inAnimation = new AlphaAnimation(0f, 1f);
+        inAnimation.setDuration(200);
+        downloadScreen.setAnimation(inAnimation);
+        downloadScreen.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected Void doInBackground(Void... params) {
+        boolean fail = false;
+        String fullBook = "";
+        // Needed to make http download work properly
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        try {
+            // assemble the string and the search request
+            StringBuilder response = new StringBuilder();
+            URL url = new URL(str_url);
+
+            // make the connection
+            HttpURLConnection httpconn = (HttpURLConnection) url.openConnection();
+
+            // did it do ok?
+            if ( httpconn.getResponseCode() == HttpURLConnection.HTTP_OK ) {
+                BufferedReader input = new BufferedReader(
+                        new InputStreamReader(httpconn.getInputStream()), 8192);
+                String strLine = null;
+                while ((strLine = input.readLine()) != null) {
+                    // have more data
+                    response.append(strLine);
+                    response.append("\n");
+                    if(isCancelled()){
+                        break;
+                    }
+                }
+                input.close();
+                fullBook = response.toString();
+                System.out.println(fullBook);
+            }
+        } catch ( IOException e ) {
+            System.out.println("BALLLLLLLLLLS");
+            System.out.println(e);
+            fail = true;
+        }
+        if(!fail){
+            // Sets up file output stream to be able to save the book
+            FileOutputStream fos = null;
+            try {
+                fos = context.openFileOutput(book, context.MODE_PRIVATE);
+                fos.write(fullBook.getBytes());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (fos != null){
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void v) {
+        super.onPostExecute(v);
+        AlphaAnimation outAnimation = new AlphaAnimation(1f, 0f);
+        outAnimation.setDuration(200);
+        downloadScreen.setAnimation(outAnimation);
+        downloadScreen.setVisibility(View.GONE);
+        download.setText("Downloaded");
     }
 }

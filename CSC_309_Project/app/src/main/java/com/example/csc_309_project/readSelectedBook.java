@@ -2,15 +2,21 @@ package com.example.csc_309_project;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
@@ -25,7 +31,7 @@ import java.io.InputStreamReader;
 
 public class readSelectedBook extends AppCompatActivity {
 
-    int linesInBook = 0;
+    public static int linesInBook = 0;
     String BookName = "";
 
     Thread loadBookThread = new Thread(){
@@ -48,7 +54,6 @@ public class readSelectedBook extends AppCompatActivity {
             }
         });
     }
-
     // Loads the book
     public void loadBook(String BookName){
         String Book = "";
@@ -181,7 +186,9 @@ public class readSelectedBook extends AppCompatActivity {
 
         // Gets the Book name that should fill in the book text view
         BookName = getIntent().getStringExtra("BOOK_TITLE");
-        loadBookThread.start();
+        FrameLayout loadingScreen = findViewById(R.id.loadingScreen);
+        TextView book = findViewById(R.id.bookTextView);
+        //loadBookThread.start();
 
         // SHOULD set the scrollview to the last saved position in the book
         setScrollView(BookName, loadPosition(BookName));
@@ -197,8 +204,8 @@ public class readSelectedBook extends AppCompatActivity {
             public void onClick(View view) {
                 ScrollView BSV = findViewById(R.id.scrollView2);
                 savePosition(BSV.getScrollY(), BookName);
-                Intent startIntent = new Intent(getApplicationContext(), userBookMenu.class);
-                startActivity(startIntent);
+
+                finish();
             }
         });
 
@@ -240,24 +247,97 @@ public class readSelectedBook extends AppCompatActivity {
 
         // Code for changing the font size
         final EditText fontSizeText = findViewById(R.id.declaredFontSize);
-        fontSizeText.addTextChangedListener(new TextWatcher() {
-
-            // Changes the size of the font as the user types a new value in
-            public void afterTextChanged(Editable s) {
-                setFontSize(Integer.parseInt(fontSizeText.getText().toString()));
-            }
-
-            // Again needed for the listener to work
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+        fontSizeText.setSelectAllOnFocus(true);
+        fontSizeText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                boolean handled = false;
+                if (i == EditorInfo.IME_ACTION_DONE) {
+                    setFontSize(Integer.parseInt(fontSizeText.getText().toString()));;
+                    handled = true;
+                }
+                return handled;
             }
         });
 
-
+        new LoadBook(this, loadingScreen, BookName, book).execute();
     }
 
 
+}
+
+class LoadBook extends AsyncTask<String, String, String> {
+    Context context;
+    FrameLayout loadingScreen;
+    String bookname;
+    TextView book;
+
+    LoadBook(Context context, FrameLayout loadingScreen, String bookname, TextView book) {
+        this.context = context;
+        this.loadingScreen = loadingScreen;
+        this.bookname = bookname;
+        this.book = book;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        AlphaAnimation inAnimation = new AlphaAnimation(0f, 1f);
+        inAnimation.setDuration(200);
+        loadingScreen.setAnimation(inAnimation);
+        loadingScreen.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected String doInBackground(String... strings) {
+        String Book = "";
+        try{
+
+            FileInputStream fis = null;
+
+            // Trys to open the book and put it into a string
+            try {
+                fis = context.openFileInput(bookname);
+                InputStreamReader isr = new InputStreamReader(fis);
+                BufferedReader br = new BufferedReader(isr);
+                String text;
+
+                // Puts the saved file all into a readable form string
+                while((text = br.readLine()) != null){
+                    Book += text + "\n";
+                    readSelectedBook.linesInBook += 1;
+                    if(isCancelled()){
+                        break;
+                    }
+                }
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (fis != null){
+                    try {
+                        fis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (Exception e){
+            System.out.println(e);
+            e.printStackTrace();
+        }
+        return Book;
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        super.onPostExecute(result);
+        book.setText(result);
+        AlphaAnimation outAnimation = new AlphaAnimation(1f, 0f);
+        outAnimation.setDuration(200);
+        loadingScreen.setAnimation(outAnimation);
+        loadingScreen.setVisibility(View.GONE);
+    }
 }
