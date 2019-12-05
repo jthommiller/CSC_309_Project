@@ -5,11 +5,28 @@ Project: Create an android app that can download and read an Ebook
  */
 package com.example.csc_309_project;
 
+<<<<<<< Updated upstream
+=======
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Context;
+>>>>>>> Stashed changes
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+<<<<<<< Updated upstream
+=======
+import android.graphics.Color;
+import android.os.AsyncTask;
+>>>>>>> Stashed changes
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
+<<<<<<< Updated upstream
+=======
+import android.widget.FrameLayout;
+import android.widget.ScrollView;
+>>>>>>> Stashed changes
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -132,6 +149,8 @@ public class userBookMenu extends AppCompatActivity {
     String[][] Position;
     // Global variable so buttons set which book should be downloading
     int downloadID = 0;
+    FrameLayout loadingScreen;
+
     // Runs the book downloading method
     Thread downloadBookThread = new Thread(){
         public void run() {
@@ -262,8 +281,16 @@ public class userBookMenu extends AppCompatActivity {
                                 if ( Books[v.getId()][3] == "false" ){
                                     downloadID = v.getId();
                                     Books[v.getId()][3] = "true";
+<<<<<<< Updated upstream
                                     downloadBookThread.run();
                                     createTableDownload();
+=======
+                                    downloadButton.setText("Downloaded");
+                                    downloadButton.setClickable(false);
+                                    updateBookList(book, 1);
+                                    downloadBookThread.start();
+                                    //new DownloadBook(getApplicationContext(), loadingScreen, Books[v.getId()][2], book).execute();
+>>>>>>> Stashed changes
                                 }
 
                             }
@@ -271,6 +298,11 @@ public class userBookMenu extends AppCompatActivity {
                     } else {
                         downloadButton.setText("Downloaded");
                         downloadButton.setId(i);
+<<<<<<< Updated upstream
+=======
+                        downloadButton.setTextSize(12);
+                        downloadButton.setClickable(false);
+>>>>>>> Stashed changes
                     }
                     downloadButton.setLayoutParams(lp);
                     tr.addView(downloadButton);
@@ -307,6 +339,10 @@ public class userBookMenu extends AppCompatActivity {
     // Creates the table for showing owned books
     public void createTableOwned(){
 
+<<<<<<< Updated upstream
+=======
+        updateLibrary();
+>>>>>>> Stashed changes
 
         // Creates the table
         final TableLayout BookTable;
@@ -472,6 +508,19 @@ public class userBookMenu extends AppCompatActivity {
         setContentView(R.layout.activity_user_book_menu);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
+<<<<<<< Updated upstream
+=======
+        // Needed to make http download work properly
+        if (android.os.Build.VERSION.SDK_INT > 9) {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
+        checkBookDownloaded();
+        createTableOwned();
+
+        loadingScreen = findViewById(R.id.loadingScreen);
+
+>>>>>>> Stashed changes
         final TextView tv = findViewById(R.id.mainMenuTitle);
         tv.setText(usersLibraryTitle);
 
@@ -501,3 +550,97 @@ public class userBookMenu extends AppCompatActivity {
         });
     }
 }
+/*
+class DownloadBook extends AsyncTask<Void, Void, Void> {
+    Context context;
+    FrameLayout loadingScreen;
+    String str_url;
+    String book;
+
+    DownloadBook(Context context, FrameLayout loadingScreen, String url, String book) {
+        this.context = context;
+        this.loadingScreen = loadingScreen;
+        str_url = url;
+        this.book = book;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        AlphaAnimation inAnimation = new AlphaAnimation(0f, 1f);
+        inAnimation.setDuration(200);
+        loadingScreen.setAnimation(inAnimation);
+        loadingScreen.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected Void doInBackground(Void... params) {
+        boolean fail = false;
+        String fullBook = "";
+        // Needed to make http download work properly
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        try {
+            // assemble the string and the search request
+            StringBuilder response = new StringBuilder();
+            URL url = new URL(str_url);
+
+            // make the connection
+            HttpURLConnection httpconn = (HttpURLConnection) url.openConnection();
+            httpconn.setRequestMethod("GET");
+            httpconn.connect();
+
+            // did it do ok?
+            if ( httpconn.getResponseCode() == HttpURLConnection.HTTP_OK ) {
+                BufferedReader input = new BufferedReader(
+                        new InputStreamReader(httpconn.getInputStream()), 8192);
+                String strLine = null;
+                while ((strLine = input.readLine()) != null) {
+                    // have more data
+                    response.append(strLine);
+                    response.append("\n");
+                    if(isCancelled()){
+                        break;
+                    }
+                }
+                input.close();
+                fullBook = response.toString();
+                System.out.println(fullBook);
+            }
+        } catch ( IOException e ) {
+            System.out.println("BALLLLLLLLLLS");
+            System.out.println(e);
+            fail = true;
+        }
+        if(!fail){
+            // Sets up file output stream to be able to save the book
+            FileOutputStream fos = null;
+            try {
+                fos = context.openFileOutput(book, context.MODE_PRIVATE);
+                fos.write(fullBook.getBytes());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (fos != null){
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void v) {
+        super.onPostExecute(v);
+        AlphaAnimation outAnimation = new AlphaAnimation(1f, 0f);
+        outAnimation.setDuration(200);
+        loadingScreen.setAnimation(outAnimation);
+        loadingScreen.setVisibility(View.GONE);
+    }
+}*/
