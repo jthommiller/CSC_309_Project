@@ -5,13 +5,11 @@ Project: Create an android app that can download and read an Ebook
  */
 package com.example.csc_309_project;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -20,15 +18,16 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.material.tabs.TabLayout;
-import org.w3c.dom.Text;
+
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,9 +35,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Set;
-import java.util.prefs.Preferences;
 
 public class userBookMenu extends AppCompatActivity {
 
@@ -142,191 +138,11 @@ public class userBookMenu extends AppCompatActivity {
             {"The Yellow Wallpaper", "Charlotte Perkins Gilman", "https://www.gutenberg.org/files/1952/1952-0.txt", "false"}
     };
 
-    // Variable Initialization
-    FrameLayout downloadScreen;
+    // Global Variable Initialization
     ArrayList<String> library = new ArrayList<>();
     int librarySize;
-
-    // Deletes the book off the phone
-    public boolean deleteBook( String BookName ){
-        boolean deleted = false;
-        try{
-            File dir = getFilesDir();
-            File file = new File(dir, BookName);
-            deleted = file.delete();
-        } catch ( Exception E ){
-            E.printStackTrace();
-        } finally {
-            deletePosition(BookName);
-            return deleted;
-        }
-    }
-
-    // Deletes the position off the phone
-    public void deletePosition( String BookName ){
-        try{
-            File dir = getFilesDir();
-            File file = new File(dir, BookName + " Position");
-            file.delete();
-        } catch ( Exception E ){
-            E.printStackTrace();
-        }
-    }
-
-    // Checks if the book is currently downloaded
-    public void checkBookDownloaded(){
-        for (int i = 0; i < Books.length; i++){
-            FileInputStream fis = null;
-
-            try {
-                fis = openFileInput(Books[i][0]);
-                Books[i][3] = "true";
-            } catch (FileNotFoundException e) {
-                Books[i][3] = "false";
-                e.printStackTrace();
-            }
-        }
-    }
-
-    // Gets the author from the main list for table owned purposes
-    public String getAuthor(String bookName){
-        int size = Books.length;
-        for(int i = 0; i < size; i++){
-            if(Books[i][0].equals(bookName)){
-                return Books[i][1];
-            }
-        }
-        return "ERROR";
-    }
-
-    // Creates the table for downloading books
-    public void createTableDownload(){
-
-        // Creates the table
-        TableRow.LayoutParams lp = new TableRow.LayoutParams();
-        TableRow.LayoutParams trlp = new TableRow.LayoutParams();
-        final TableLayout BookTable = findViewById(R.id.tableOfBooks);
-        TableRow tr = null;
-        BookTable.removeAllViews();
-
-        // Creates new row
-        tr = new TableRow(this);
-        tr.setLayoutParams(trlp);
-        BookTable.addView(tr);
-        trlp.height = 45;
-
-        // Starts running through each book
-        for (int i = 0; i < Books.length; i++){
-            for(int j = 0; j < 3; j++){
-
-                // Creates download button for each record of the table in the third column
-               if ( j == 2 ) {
-                    final Button downloadButton = new Button(this);
-                   lp.width = 0;
-                   lp.weight = 1;
-
-                   // If the book isn't downloaded make the button say download and add functionality
-                    if ( Books[i][3] == "false" ) {
-                        downloadButton.setText("Download");
-                        downloadButton.setId(i);
-
-                        // Allows the user to click on the download button and download it
-                        downloadButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                String book = Books[v.getId()][0];
-                                Books[v.getId()][3] = "true";
-                                new DownloadBook(getApplicationContext(), downloadScreen, downloadButton, Books[v.getId()][2], book).execute();
-                                updateBookList(book, 1);
-                            }
-                        });
-
-                    // For when the user views the download table it will say downloaded now
-                    } else {
-                        downloadButton.setText("Downloaded");
-                        downloadButton.setId(i);
-                        downloadButton.setTextSize(12);
-                    }
-
-                    // Adds to the table row
-                    downloadButton.setLayoutParams(lp);
-                    tr.addView(downloadButton);
-
-                    // Adds the author to the second column table
-                } else if ( j == 1  ) {
-                    TextView Author = new TextView(this);
-                    Author.setText(Books[i][1]);
-                    Author.setId(i);
-                    lp.width = 0;
-                    lp.weight = 1;
-
-                   // Adds to the table row
-                    Author.setLayoutParams(lp);
-                    tr.addView(Author);
-
-                    // Adds the book name to the first column or table
-                } else {
-                   TextView BookName = new TextView(this);
-                    BookName.setText(Books[i][0]);
-                    BookName.setId(i);
-                   lp.width = 0;
-                   lp.weight = 2;
-
-                   // Adds to the table row
-                   BookName.setLayoutParams(lp);
-                    tr.addView(BookName);
-                }
-            }
-
-            // Places the just created row into the table
-            tr = new TableRow(this);
-            tr.setLayoutParams(trlp);
-            BookTable.addView(tr);
-        }
-    }
-
-
-    // Updates the shared preferences to account for new or removed books
-    public void updateSharedPreferences(){
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor edit = preferences.edit();
-
-        // Runs through the entire preferences getting the updated data
-        for(int i = 0; i < librarySize; i++){
-            edit.remove("BOOK_TITLE"+i);
-            edit.putString("BOOK_TITLE"+i, library.get(i));
-        }
-
-        // Puts the new size of book library in shared preferences
-        edit.putInt("SIZE", librarySize-1);
-        edit.commit();
-
-        // Updates the library for new books
-        updateLibrary();
-    }
-
-    // Handles adding, modifying, or removing of books from the users library
-    public void updateBookList(String book, int action){
-        switch(action){
-            case 1:
-                library.add(book);
-                break;
-            case 2:
-                library.remove(book);
-                library.add(0, book);
-                break;
-            case 3:
-                library.remove(book);
-                break;
-            default:
-                System.out.println("Error: " + book + " " + action);
-                break;
-        }
-
-        // Sets the new size and updates shared preferences to account for this new action
-        librarySize = library.size();
-        updateSharedPreferences();
-    }
+    final static String usersLibraryTitle = "Your Library";
+    final static String addToLibraryTitle = "Download Books To Your Library";
 
     // Creates the table for showing owned books
     public void createTableOwned(){
@@ -342,7 +158,7 @@ public class userBookMenu extends AppCompatActivity {
         tr = new TableRow(this);
         tr.setLayoutParams(trlp);
         BookTable.addView(tr);
-        trlp.height = 45;
+        trlp.height = 60;
 
         // Starts running through each book in library
         for(int i = 0; i < librarySize; i++){
@@ -375,8 +191,10 @@ public class userBookMenu extends AppCompatActivity {
                     deleteButton.setLayoutParams(lp);
                     tr.addView(deleteButton);
 
-                    // Places the authors name in the second column
-                } else if (j == 1) {
+
+                }
+                // Places the authors name in the second column
+                else if (j == 1) {
                     TextView Author = new TextView(this);
                     Author.setText(getAuthor(library.get(i)));
                     Author.setId(i);
@@ -387,8 +205,10 @@ public class userBookMenu extends AppCompatActivity {
                     Author.setLayoutParams(lp);
                     tr.addView(Author);
 
-                    // Places the book name into the fist column
-                } else {
+
+                }
+                // Places the book name into the fist column
+                else {
                     TextView BookName = new TextView(this);
                     BookName.setText(library.get(i));
                     BookName.setId(i);
@@ -399,6 +219,7 @@ public class userBookMenu extends AppCompatActivity {
                     tr.addView(BookName);
 
                     // Allows the user to click on the bookname and read the book
+                    final TableRow finalTr = tr;
                     BookName.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -418,6 +239,7 @@ public class userBookMenu extends AppCompatActivity {
 
             // Add this row to the table
             tr = new TableRow(this);
+            tr.setLayoutParams(trlp);
             BookTable.addView(tr);
         }
     }
@@ -435,9 +257,181 @@ public class userBookMenu extends AppCompatActivity {
         librarySize = library.size();
     }
 
-    // Strings use to denote which table the user is looking at
-    final static String usersLibraryTitle = "Your Library";
-    final static String addToLibraryTitle = "Download Books To Your Library";
+    // Deletes the book off the phone
+    public boolean deleteBook( String BookName ){
+        boolean deleted = false;
+        try{
+            File dir = getFilesDir();
+            File file = new File(dir, BookName);
+            deleted = file.delete();
+        }
+        catch ( Exception E ){
+            E.printStackTrace();
+        }
+        finally {
+            deletePosition(BookName);
+            return deleted;
+        }
+    }
+
+    // Deletes the position off the phone
+    public void deletePosition( String BookName ){
+        try{
+            File dir = getFilesDir();
+            File file = new File(dir, BookName + " Position");
+            file.delete();
+        }
+        catch ( Exception E ){
+            E.printStackTrace();
+        }
+    }
+
+    // Handles adding, modifying, or removing of books from the users library
+    public void updateBookList(String book, int action){
+        switch(action){
+            case 1:
+                library.add(book);
+                break;
+            case 2:
+                library.remove(book);
+                library.add(0, book);
+                break;
+            case 3:
+                library.remove(book);
+                break;
+            default:
+                System.out.println("Error: " + book + " " + action);
+                break;
+        }
+
+        // Sets the new size and updates shared preferences to account for this new action
+        librarySize = library.size();
+        updateSharedPreferences();
+    }
+
+    // Updates the shared preferences to account for new or removed books
+    public void updateSharedPreferences(){
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit = preferences.edit();
+
+        edit.clear();
+        edit.apply();
+
+        // Runs through the entire preferences getting the updated data
+        for(int i = 0; i < librarySize; i++){
+            edit.remove("BOOK_TITLE"+i);
+            edit.putString("BOOK_TITLE"+i, library.get(i));
+        }
+
+        // Puts the new size of book library in shared preferences
+        edit.putInt("SIZE", librarySize-1);
+        edit.commit();
+
+        // Updates the library for new books
+        updateLibrary();
+    }
+
+    // Gets the author from the main list for table owned purposes
+    public String getAuthor(String bookName){
+        int size = Books.length;
+        for(int i = 0; i < size; i++){
+            if(Books[i][0].equals(bookName)){
+                return Books[i][1];
+            }
+        }
+        return "ERROR";
+    }
+
+    // Creates the table for downloading books
+    public void createTableDownload(){
+
+        // Creates the table
+        TableRow.LayoutParams lp = new TableRow.LayoutParams();
+        TableRow.LayoutParams trlp = new TableRow.LayoutParams();
+        final TableLayout BookTable = findViewById(R.id.tableOfBooks);
+        TableRow tr = null;
+        BookTable.removeAllViews();
+
+        // Creates new row
+        tr = new TableRow(this);
+        tr.setLayoutParams(trlp);
+        BookTable.addView(tr);
+        trlp.height = 60;
+
+        // Starts running through each book
+        for (int i = 0; i < Books.length; i++){
+            for(int j = 0; j < 3; j++){
+
+                // Creates download button for each record of the table in the third column
+               if ( j == 2 ) {
+                    final Button downloadButton = new Button(this);
+                   lp.width = 0;
+                   lp.weight = 1;
+
+                   // If the book isn't downloaded make the button say download and add functionality
+                    if ( Books[i][3] == "false" ) {
+                        downloadButton.setText("Download");
+                        downloadButton.setId(i);
+
+                        // Allows the user to click on the download button and download it
+                        downloadButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String book = Books[v.getId()][0];
+                                Books[v.getId()][3] = "true";
+                                FrameLayout downloadScreen = findViewById(R.id.downloadScreen);
+                                new DownloadBook(getApplicationContext(), downloadScreen, downloadButton, Books[v.getId()][2], book).execute();
+                                updateBookList(book, 1);
+                            }
+                        });
+
+                    // For when the user views the download table it will say downloaded now
+                    } else {
+                        downloadButton.setText("Downloaded");
+                        downloadButton.setId(i);
+                        downloadButton.setTextSize(12);
+                    }
+
+                    // Adds to the table row
+                    downloadButton.setLayoutParams(lp);
+                    tr.addView(downloadButton);
+
+
+               }
+               // Adds the author to the second column table
+               else if ( j == 1  ) {
+                    TextView Author = new TextView(this);
+                    Author.setText(Books[i][1]);
+                    Author.setId(i);
+                    lp.width = 0;
+                    lp.weight = 1;
+
+                   // Adds to the table row
+                    Author.setLayoutParams(lp);
+                    tr.addView(Author);
+
+
+               }
+               // Adds the book name to the first column or table
+               else {
+                   TextView BookName = new TextView(this);
+                    BookName.setText(Books[i][0]);
+                    BookName.setId(i);
+                   lp.width = 0;
+                   lp.weight = 2;
+
+                   // Adds to the table row
+                   BookName.setLayoutParams(lp);
+                    tr.addView(BookName);
+                }
+            }
+
+            // Places the just created row into the table
+            tr = new TableRow(this);
+            tr.setLayoutParams(trlp);
+            BookTable.addView(tr);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -445,7 +439,9 @@ public class userBookMenu extends AppCompatActivity {
         setContentView(R.layout.activity_user_book_menu);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        downloadScreen = findViewById(R.id.downloadScreen);
+        // Intitializes variables for event handlers
+        final TabLayout tl = findViewById(R.id.navigationTabBar);
+        final TextView tv = findViewById(R.id.mainMenuTitle);
 
         // Needed to make http download work properly
         if (android.os.Build.VERSION.SDK_INT > 9) {
@@ -453,23 +449,20 @@ public class userBookMenu extends AppCompatActivity {
             StrictMode.setThreadPolicy(policy);
         }
 
-        // Updates the library to most recent data if any
+        // Updates the user's library based on shared preferences
         updateLibrary();
-        checkBookDownloaded();
+
+        // Updates the library to most recent data if any
+        //checkBookDownloaded();
         createTableOwned();
 
-        // Sets text view to tell which table we are in
-        final TextView tv = findViewById(R.id.mainMenuTitle);
-        tv.setText(usersLibraryTitle);
 
         // Sets up the tab selector to neatly change tables
-        final TabLayout tl = findViewById(R.id.navigationTabBar);
         tl.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 if(tab.getPosition() == 0){
                     tv.setText(usersLibraryTitle);
-                    updateLibrary();
                     createTableOwned();
                 }
                 else{
@@ -481,13 +474,14 @@ public class userBookMenu extends AppCompatActivity {
             // These two are needed to make the listener work
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-
             }
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-
             }
         });
+
+        // Sets text view to tell which table we are in
+        tv.setText(usersLibraryTitle);
     }
 }
 
@@ -495,22 +489,22 @@ public class userBookMenu extends AppCompatActivity {
 class DownloadBook extends AsyncTask<Void, Void, Void> {
 
     // Variable Initialization
+    Button download;
     Context context;
     FrameLayout downloadScreen;
-    Button download;
-    String str_url;
     String book;
+    String str_url;
 
-    // Sets up our variables with values
+    // Sets up our variables with values - AsyncTask construtor
     DownloadBook(Context context, FrameLayout downloadScreen, Button download, String url, String book) {
+        this.book = book;
         this.context = context;
         this.downloadScreen = downloadScreen;
         this.download = download;
         str_url = url;
-        this.book = book;
     }
 
-    // Darken everything and allow the progress bar to be seen
+    // Darken everything and allow the progress bar to be seen to show progress of download
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
